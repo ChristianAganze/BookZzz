@@ -1,0 +1,6 @@
+{
+  "name": "BookZZZ",
+  "description": "Application native de réservation d'hôtels épurée et adaptée aux réalités locales avec assistant intelligent",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,68 @@
+{
+  "Français": [
+    {
+      "question": "Comment réserver une chambre ?",
+      "answer": "Sélectionnez un hôtel depuis l'accueil, choisissez votre catégorie de chambre préférée, entrez vos dates, copiez la référence de votre transaction Mobile Money, puis validez avec l'appui de notre IA."
+    },
+    {
+      "question": "Quels opérateurs Mob Money acceptez-vous ?",
+      "answer": "Nous acceptons M-Pesa, Airtel Money et Orange Money. Les comptes de destination sont configurés de façon standard."
+    },
+    {
+      "question": "Comment fonctionne la validation instantanée ?",
+      "answer": "Notre assistant de preuve IA analyse la référence ou la capture d'écran du paiement Mobile Money et approuve automatiquement la réservation en quelques secondes !"
+    },
+    {
+      "question": "Comment demander le service de taxi ?",
+      "answer": "Une fois votre réservation validée avec succès par l'IA ou l'administrateur, un bouton 'Demander Taxi' de couleur verte apparaît sur votre reçu. Cliquez dessus pour obtenir un chauffeur !"
+    },
+    {
+      "question": "Comment contacter le service clientèle ?",
+      "answer": "Vous pouvez soit utiliser notre assistant IA interactif intégré, soit contacter directement notre réception au numéro officiel."
+    }
+  ],
+  "English": [
+    {
+      "question": "How to book a room?",
+      "answer": "Select a hotel from the home screen, choose your preferred room category, enter your dates, copy your Mobile Money transaction reference, then confirm with our AI assistance."
+    },
+    {
+      "question": "Which Mobile Money operators do you accept?",
+      "answer": "We accept M-Pesa, Airtel Money, and Orange Money. Destination accounts are configured following standard practices."
+    },
+    {
+      "question": "How does instant validation work?",
+      "answer": "Our AI proof assistant analyzes the Mobile Money payment reference or screenshot and automatically approves your reservation in seconds!"
+    },
+    {
+      "question": "How to request taxi service?",
+      "answer": "Once your reservation is successfully validated by AI or an administrator, a green 'Request Taxi' button appears on your receipt. Click it to get a driver!"
+    },
+    {
+      "question": "How to contact customer service?",
+      "answer": "You can either use our built-in interactive AI assistant or directly contact our front desk at the official phone number."
+    }
+  ],
+  "Swahili": [
+    {
+      "question": "Jinsi ya kuhifadhi chumba?",
+      "answer": "Chagua hoteli kutoka ukurasa wa mwanzo, chagua aina ya chumba unachopendelea, weka tarehe zako, nakili kumbukumbu ya malipo yako ya Mobile Money, kisha thibitisha kwa usaidizi wa AI yetu."
+    },
+    {
+      "question": "Ni mitandao gani ya Mobile Money mnayokubali?",
+      "answer": "Tunakubali M-Pesa, Airtel Money na Orange Money. Akaunti za kupokelea pesa zimepangwa kwa viwango vya kawaida."
+    },
+    {
+      "question": "Uthibitishaji wa hapo kwa hapo inafanya kazi vipi?",
+      "answer": "Msaidizi wetu wa AI anachanganua kumbukumbu au picha ya malipo ya Mobile Money na kupitisha nafasi uliyohifadhi ndani ya sekunde chache!"
+    },
+    {
+      "question": "Jinsi ya kuomba huduma ya teksi?",
+      "answer": "Baada ya uhifadhi wako kuthibitishwa kikamilifu na AI au msimamizi, kitufe cha kijani cha 'Omba Teksi' kitaonekana kwenye risiti yako. Bonyeza ili kupata dereva!"
+    },
+    {
+      "question": "Jinsi ya kuwasiliana na huduma kwa wateja?",
+      "answer": "Unaweza kutumia msaidizi wetu wa AI aliyejumuishwa ndani ya programu au kuwasiliana moja kwa moja na mapokezi yetu kupitia nambari rasmi."
+    }
+  ]
+}
