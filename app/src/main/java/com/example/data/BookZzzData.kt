@@ -172,6 +172,101 @@ object SampleData {
         )
     )
 
+    val sampleApartments = listOf(
+        com.example.shared.models.FurnishedApartment(
+            id = "APT-01",
+            title = "Appartement de Luxe Vue Lac Kivu",
+            description = "Appartement meublé 3 pièces tout équipé au quartier Himbi. Eau chaude permanente, groupe électrogène 24/7, gardiennage et Wi-Fi Fibre.",
+            city = "Goma",
+            address = "Avenue du Lac, Quartier Himbi",
+            pricePerNight = 95.0,
+            pricePerMonth = 1800.0,
+            numberOfRooms = 3,
+            numberOfBathrooms = 2,
+            maxGuests = 5,
+            isWaterAndElectricity247 = true,
+            ownerPhone = "+243 812 345 678",
+            isAvailable = true
+        ),
+        com.example.shared.models.FurnishedApartment(
+            id = "APT-02",
+            title = "Résidence Diplomatique Gombe",
+            description = "Studio VIP meublé avec finitions modernes, cuisine américaine équipée, balcon privatif et parking sécurisé.",
+            city = "Kinshasa",
+            address = "Boulevard du 30 Juin, Gombe",
+            pricePerNight = 140.0,
+            pricePerMonth = 2600.0,
+            numberOfRooms = 2,
+            numberOfBathrooms = 1,
+            maxGuests = 3,
+            isWaterAndElectricity247 = true,
+            ownerPhone = "+243 998 765 432",
+            isAvailable = true
+        )
+    )
+
+    val sampleRealEstate = listOf(
+        com.example.shared.models.RealEstateListing(
+            id = "IMM-01",
+            title = "Villa Moderne 4 Chambres avec Jardin",
+            propertyType = "Villa Résidentielle",
+            city = "Goma",
+            commune = "Karisimbi / Katindo",
+            monthlyRentUSD = 1200.0,
+            cautionMonths = 3,
+            advanceMonths = 1,
+            description = "Magnifique villa clôturée avec grand jardin gazonné, citerne d'eau 10 000L avec pompe hydrophore, installation solaire et loge gardien.",
+            agencyName = "BookZzz Immo & Partenaires",
+            contactPhone = "+243 812 345 678",
+            availableFromDate = "01/10/2026",
+            isPublished = true
+        ),
+        com.example.shared.models.RealEstateListing(
+            id = "IMM-02",
+            title = "Appartement 3 Pièces Neuf à Louer",
+            propertyType = "Appartement",
+            city = "Bukavu",
+            commune = "Ibanda / Ndendere",
+            monthlyRentUSD = 650.0,
+            cautionMonths = 3,
+            advanceMonths = 2,
+            description = "Bel appartement au 2ème étage d'un immeuble récent. Vue panoramique, compteur SNEL prépayé individuel, accès goudronné.",
+            agencyName = "Kivu Real Estate",
+            contactPhone = "+243 898 123 456",
+            availableFromDate = "15/09/2026",
+            isPublished = true
+        )
+    )
+
+    val sampleVehicles = listOf(
+        com.example.shared.models.SharedVehicle(
+            id = "VEH-01",
+            modelName = "Toyota Land Cruiser Prado TXL",
+            category = "SUV 4x4 Luxe",
+            seats = 7,
+            pricePerDayUSD = 130.0,
+            priceAirportTransferUSD = 40.0,
+            hasAirConditioning = true,
+            hasChauffeurIncluded = true,
+            driverName = "Erick Bahati",
+            driverPhone = "+243 821 112 233",
+            isAvailable = true
+        ),
+        com.example.shared.models.SharedVehicle(
+            id = "VEH-02",
+            modelName = "Toyota HiAce Coaster VIP",
+            category = "Minibus Délégation",
+            seats = 14,
+            pricePerDayUSD = 220.0,
+            priceAirportTransferUSD = 75.0,
+            hasAirConditioning = true,
+            hasChauffeurIncluded = true,
+            driverName = "Claude Mumbere",
+            driverPhone = "+243 970 445 566",
+            isAvailable = true
+        )
+    )
+
     fun createRoomsForHotel(hotelId: String, basePrice: Double): List<Room> {
         return listOf(
             Room("R_${hotelId}_1", hotelId, "Chambre Standard", basePrice, true),
@@ -191,6 +286,9 @@ class BookZzzRepository(private val context: Context) {
     private val bookingListAdapter = moshi.adapter<List<Booking>>(Types.newParameterizedType(List::class.java, Booking::class.java))
     private val userAdapter = moshi.adapter(UserProfile::class.java)
     private val roomListAdapter = moshi.adapter<List<Room>>(Types.newParameterizedType(List::class.java, Room::class.java))
+    private val apartmentListAdapter = moshi.adapter<List<com.example.shared.models.FurnishedApartment>>(Types.newParameterizedType(List::class.java, com.example.shared.models.FurnishedApartment::class.java))
+    private val realEstateListAdapter = moshi.adapter<List<com.example.shared.models.RealEstateListing>>(Types.newParameterizedType(List::class.java, com.example.shared.models.RealEstateListing::class.java))
+    private val vehicleListAdapter = moshi.adapter<List<com.example.shared.models.SharedVehicle>>(Types.newParameterizedType(List::class.java, com.example.shared.models.SharedVehicle::class.java))
 
     private val _rooms = MutableStateFlow<List<Room>>(emptyList())
     val rooms: StateFlow<List<Room>> = _rooms.asStateFlow()
@@ -200,6 +298,15 @@ class BookZzzRepository(private val context: Context) {
 
     private val _bookings = MutableStateFlow<List<Booking>>(emptyList())
     val bookings: StateFlow<List<Booking>> = _bookings.asStateFlow()
+
+    private val _apartments = MutableStateFlow<List<com.example.shared.models.FurnishedApartment>>(emptyList())
+    val apartments: StateFlow<List<com.example.shared.models.FurnishedApartment>> = _apartments.asStateFlow()
+
+    private val _realEstateListings = MutableStateFlow<List<com.example.shared.models.RealEstateListing>>(emptyList())
+    val realEstateListings: StateFlow<List<com.example.shared.models.RealEstateListing>> = _realEstateListings.asStateFlow()
+
+    private val _vehicles = MutableStateFlow<List<com.example.shared.models.SharedVehicle>>(emptyList())
+    val vehicles: StateFlow<List<com.example.shared.models.SharedVehicle>> = _vehicles.asStateFlow()
 
     private val _currentUser = MutableStateFlow<UserProfile?>(null)
     val currentUser: StateFlow<UserProfile?> = _currentUser.asStateFlow()
@@ -220,6 +327,15 @@ class BookZzzRepository(private val context: Context) {
         
         val roomsJson = sharedPrefs.getString("rooms_list", null)
         _rooms.value = if (roomsJson != null) roomListAdapter.fromJson(roomsJson) ?: emptyList() else SampleData.hotels.flatMap { SampleData.createRoomsForHotel(it.id, it.basePricePerNight) }
+
+        val aptsJson = sharedPrefs.getString("apartments_list", null)
+        _apartments.value = if (aptsJson != null) apartmentListAdapter.fromJson(aptsJson) ?: SampleData.sampleApartments else SampleData.sampleApartments
+
+        val immoJson = sharedPrefs.getString("realestate_list", null)
+        _realEstateListings.value = if (immoJson != null) realEstateListAdapter.fromJson(immoJson) ?: SampleData.sampleRealEstate else SampleData.sampleRealEstate
+
+        val vehJson = sharedPrefs.getString("vehicles_list", null)
+        _vehicles.value = if (vehJson != null) vehicleListAdapter.fromJson(vehJson) ?: SampleData.sampleVehicles else SampleData.sampleVehicles
     }
 
     fun saveUser(user: UserProfile) {
@@ -236,11 +352,85 @@ class BookZzzRepository(private val context: Context) {
         _hotels.value = updatedList
         sharedPrefs.edit().putString("hotels_list", hotelListAdapter.toJson(updatedList)).apply()
     }
+
+    fun updateHotel(hotel: Hotel) {
+        val updated = _hotels.value.map { if (it.id == hotel.id) hotel else it }
+        updateHotels(updated)
+    }
     
     fun updateRoom(room: Room) {
         val updated = _rooms.value.map { if (it.id == room.id) room else it }
         _rooms.value = updated
         sharedPrefs.edit().putString("rooms_list", roomListAdapter.toJson(updated)).apply()
+    }
+
+    fun addRoom(room: Room) {
+        val updated = _rooms.value + room
+        _rooms.value = updated
+        sharedPrefs.edit().putString("rooms_list", roomListAdapter.toJson(updated)).apply()
+    }
+
+    fun deleteRoom(roomId: String) {
+        val updated = _rooms.value.filter { it.id != roomId }
+        _rooms.value = updated
+        sharedPrefs.edit().putString("rooms_list", roomListAdapter.toJson(updated)).apply()
+    }
+
+    // --- APARTMENTS CRUD ---
+    fun addApartment(apartment: com.example.shared.models.FurnishedApartment) {
+        val updated = _apartments.value + apartment
+        _apartments.value = updated
+        sharedPrefs.edit().putString("apartments_list", apartmentListAdapter.toJson(updated)).apply()
+    }
+
+    fun updateApartment(apartment: com.example.shared.models.FurnishedApartment) {
+        val updated = _apartments.value.map { if (it.id == apartment.id) apartment else it }
+        _apartments.value = updated
+        sharedPrefs.edit().putString("apartments_list", apartmentListAdapter.toJson(updated)).apply()
+    }
+
+    fun deleteApartment(apartmentId: String) {
+        val updated = _apartments.value.filter { it.id != apartmentId }
+        _apartments.value = updated
+        sharedPrefs.edit().putString("apartments_list", apartmentListAdapter.toJson(updated)).apply()
+    }
+
+    // --- REAL ESTATE CRUD ---
+    fun addRealEstate(listing: com.example.shared.models.RealEstateListing) {
+        val updated = _realEstateListings.value + listing
+        _realEstateListings.value = updated
+        sharedPrefs.edit().putString("realestate_list", realEstateListAdapter.toJson(updated)).apply()
+    }
+
+    fun updateRealEstate(listing: com.example.shared.models.RealEstateListing) {
+        val updated = _realEstateListings.value.map { if (it.id == listing.id) listing else it }
+        _realEstateListings.value = updated
+        sharedPrefs.edit().putString("realestate_list", realEstateListAdapter.toJson(updated)).apply()
+    }
+
+    fun deleteRealEstate(listingId: String) {
+        val updated = _realEstateListings.value.filter { it.id != listingId }
+        _realEstateListings.value = updated
+        sharedPrefs.edit().putString("realestate_list", realEstateListAdapter.toJson(updated)).apply()
+    }
+
+    // --- VEHICLE CRUD ---
+    fun addVehicle(vehicle: com.example.shared.models.SharedVehicle) {
+        val updated = _vehicles.value + vehicle
+        _vehicles.value = updated
+        sharedPrefs.edit().putString("vehicles_list", vehicleListAdapter.toJson(updated)).apply()
+    }
+
+    fun updateVehicle(vehicle: com.example.shared.models.SharedVehicle) {
+        val updated = _vehicles.value.map { if (it.id == vehicle.id) vehicle else it }
+        _vehicles.value = updated
+        sharedPrefs.edit().putString("vehicles_list", vehicleListAdapter.toJson(updated)).apply()
+    }
+
+    fun deleteVehicle(vehicleId: String) {
+        val updated = _vehicles.value.filter { it.id != vehicleId }
+        _vehicles.value = updated
+        sharedPrefs.edit().putString("vehicles_list", vehicleListAdapter.toJson(updated)).apply()
     }
 
     fun toggleHotelSuspension(hotelId: String) {
@@ -284,5 +474,8 @@ class BookZzzRepository(private val context: Context) {
         _hotels.value = SampleData.hotels
         _bookings.value = emptyList()
         _rooms.value = SampleData.hotels.flatMap { SampleData.createRoomsForHotel(it.id, it.basePricePerNight) }
+        _apartments.value = SampleData.sampleApartments
+        _realEstateListings.value = SampleData.sampleRealEstate
+        _vehicles.value = SampleData.sampleVehicles
     }
 }

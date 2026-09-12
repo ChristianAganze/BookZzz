@@ -47,6 +47,8 @@ import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -123,7 +125,8 @@ fun HotelAdminDashboardScreen(
     rooms: List<Room>,
     currentUser: UserProfile?,
     onLogout: () -> Unit,
-    onOpenShowcase: () -> Unit
+    onOpenShowcase: () -> Unit,
+    onOpenCatalog: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
@@ -239,6 +242,29 @@ fun HotelAdminDashboardScreen(
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Open Catalogue Management
+                    Button(
+                        onClick = onOpenCatalog,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = BrandGold,
+                            contentColor = Color(0xFF1D1726)
+                        ),
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Tune,
+                            contentDescription = null,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Catalogue",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
                     // Back to showcase site button
                     IconButton(
                         onClick = onOpenShowcase,
@@ -323,6 +349,67 @@ fun HotelAdminDashboardScreen(
                         containerColor = Color(0xFF2A2234),
                         accentColor = BrandAzure
                     )
+                }
+            }
+
+            // --- 2b. CATALOGUE SHORTCUT BANNER ---
+            item {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onOpenCatalog() },
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color(0xFF2A2234),
+                    border = BorderStroke(1.dp, BrandGold.copy(alpha = 0.6f))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Surface(
+                                modifier = Modifier.size(38.dp),
+                                shape = RoundedCornerShape(10.dp),
+                                color = BrandGold.copy(alpha = 0.15f),
+                                border = BorderStroke(1.dp, BrandGold)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Default.Tune,
+                                        contentDescription = null,
+                                        tint = BrandGold,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                            Column {
+                                Text(
+                                    text = "Gestion du Catalogue & Tarifs (CRUD)",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = "Chambres, Meublés, Baux Immobiliers & Flotte VIP",
+                                    fontSize = 10.sp,
+                                    color = BrandGoldLight
+                                )
+                            }
+                        }
+
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = BrandGold,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
 

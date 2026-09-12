@@ -185,6 +185,19 @@ fun MainScreen(
                 },
                 onOpenShowcase = {
                     navController.navigate("showcase")
+                },
+                onOpenCatalog = {
+                    navController.navigate("hotel_catalog_management")
+                }
+            )
+        }
+
+        composable("hotel_catalog_management") {
+            CatalogManagementScreen(
+                repository = repository,
+                currentUser = currentUser,
+                onBack = {
+                    navController.popBackStack()
                 }
             )
         }
