@@ -58,7 +58,10 @@ data class Booking(
     val screenshotName: String = "", // Used to refer to our sample receipts or user-picked
     val taxiRequested: Boolean = false,
     val taxiStatus: String? = null, // "Coordination du taxi...", "Taxi Confirmé", etc.
-    val roomType: String = "Chambre Standard"
+    val roomType: String = "Chambre Standard",
+    val rescheduledFrom: String? = null,
+    val rescheduleReason: String? = null,
+    val dateChangeHistory: List<String> = emptyList()
 )
 
 // --- Sample Data ---
@@ -452,6 +455,32 @@ class BookZzzRepository(private val context: Context) {
 
     fun updateBookingStatus(bookingId: String, newStatus: String) {
         val updated = _bookings.value.map { if (it.id == bookingId) it.copy(status = newStatus) else it }
+        _bookings.value = updated
+        sharedPrefs.edit().putString("bookings_list", bookingListAdapter.toJson(updated)).apply()
+    }
+
+    fun rescheduleBooking(
+        bookingId: String,
+        newArrival: String,
+        newDeparture: String,
+        newNumNights: Int,
+        reason: String
+    ) {
+        val updated = _bookings.value.map { b ->
+            if (b.id == bookingId) {
+                val newTotal = newNumNights * b.pricePerNight
+                val historyEntry = "Décalé de (${b.arrivalDate} au ${b.departureDate}) vers (${newArrival} au ${newDeparture}) • Motif : $reason"
+                b.copy(
+                    arrivalDate = newArrival,
+                    departureDate = newDeparture,
+                    numNights = newNumNights,
+                    totalAmount = newTotal,
+                    rescheduledFrom = "${b.arrivalDate} ➔ $newArrival",
+                    rescheduleReason = reason,
+                    dateChangeHistory = b.dateChangeHistory + historyEntry
+                )
+            } else b
+        }
         _bookings.value = updated
         sharedPrefs.edit().putString("bookings_list", bookingListAdapter.toJson(updated)).apply()
     }

@@ -188,12 +188,25 @@ fun MainScreen(
                 },
                 onOpenCatalog = {
                     navController.navigate("hotel_catalog_management")
+                },
+                onOpenCalendar = {
+                    navController.navigate("hotel_calendar_schedule")
                 }
             )
         }
 
         composable("hotel_catalog_management") {
             CatalogManagementScreen(
+                repository = repository,
+                currentUser = currentUser,
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable("hotel_calendar_schedule") {
+            CalendarScheduleScreen(
                 repository = repository,
                 currentUser = currentUser,
                 onBack = {

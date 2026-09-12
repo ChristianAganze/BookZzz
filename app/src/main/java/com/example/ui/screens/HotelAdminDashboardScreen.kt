@@ -126,7 +126,8 @@ fun HotelAdminDashboardScreen(
     currentUser: UserProfile?,
     onLogout: () -> Unit,
     onOpenShowcase: () -> Unit,
-    onOpenCatalog: () -> Unit = {}
+    onOpenCatalog: () -> Unit = {},
+    onOpenCalendar: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
@@ -242,6 +243,29 @@ fun HotelAdminDashboardScreen(
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Open Planning / Calendar
+                    Button(
+                        onClick = onOpenCalendar,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = BrandAzure,
+                            contentColor = Color(0xFF1D1726)
+                        ),
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarMonth,
+                            contentDescription = null,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Planning",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
                     // Open Catalogue Management
                     Button(
                         onClick = onOpenCatalog,
@@ -352,29 +376,77 @@ fun HotelAdminDashboardScreen(
                 }
             }
 
-            // --- 2b. CATALOGUE SHORTCUT BANNER ---
+            // --- 2b. SHORTCUTS BANNER (PLANNING & CATALOGUE) ---
             item {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onOpenCatalog() },
-                    shape = RoundedCornerShape(16.dp),
-                    color = Color(0xFF2A2234),
-                    border = BorderStroke(1.dp, BrandGold.copy(alpha = 0.6f))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Row(
+                    // Planning card
+                    Surface(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                            .weight(1f)
+                            .clickable { onOpenCalendar() },
+                        shape = RoundedCornerShape(16.dp),
+                        color = Color(0xFF2A2234),
+                        border = BorderStroke(1.dp, BrandAzure.copy(alpha = 0.7f))
                     ) {
                         Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             Surface(
-                                modifier = Modifier.size(38.dp),
+                                modifier = Modifier.size(36.dp),
+                                shape = RoundedCornerShape(10.dp),
+                                color = BrandAzure.copy(alpha = 0.15f),
+                                border = BorderStroke(1.dp, BrandAzure)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Default.CalendarMonth,
+                                        contentDescription = null,
+                                        tint = BrandAzure,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                            Column {
+                                Text(
+                                    text = "Planning & Report",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = "Décalage & Dispos",
+                                    fontSize = 10.sp,
+                                    color = Color(0xFFCCCCCC)
+                                )
+                            }
+                        }
+                    }
+
+                    // Catalogue card
+                    Surface(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { onOpenCatalog() },
+                        shape = RoundedCornerShape(16.dp),
+                        color = Color(0xFF2A2234),
+                        border = BorderStroke(1.dp, BrandGold.copy(alpha = 0.7f))
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Surface(
+                                modifier = Modifier.size(36.dp),
                                 shape = RoundedCornerShape(10.dp),
                                 color = BrandGold.copy(alpha = 0.15f),
                                 border = BorderStroke(1.dp, BrandGold)
@@ -384,31 +456,24 @@ fun HotelAdminDashboardScreen(
                                         imageVector = Icons.Default.Tune,
                                         contentDescription = null,
                                         tint = BrandGold,
-                                        modifier = Modifier.size(20.dp)
+                                        modifier = Modifier.size(18.dp)
                                     )
                                 }
                             }
                             Column {
                                 Text(
-                                    text = "Gestion du Catalogue & Tarifs (CRUD)",
+                                    text = "Catalogue & Tarifs",
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp,
+                                    fontSize = 12.sp,
                                     color = Color.White
                                 )
                                 Text(
-                                    text = "Chambres, Meublés, Baux Immobiliers & Flotte VIP",
+                                    text = "CRUD Chambres & Meublés",
                                     fontSize = 10.sp,
                                     color = BrandGoldLight
                                 )
                             }
                         }
-
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
-                            tint = BrandGold,
-                            modifier = Modifier.size(18.dp)
-                        )
                     }
                 }
             }
