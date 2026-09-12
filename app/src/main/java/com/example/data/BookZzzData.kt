@@ -115,6 +115,63 @@ object SampleData {
         )
     )
 
+    val sampleBookings = listOf(
+        Booking(
+            id = "BK-8941",
+            hotelId = "H1",
+            hotelName = "Goma Serena Hotel",
+            userId = "U2",
+            userName = "Patrick Lumumba",
+            arrivalDate = "15/09/2026",
+            departureDate = "18/09/2026",
+            numNights = 3,
+            pricePerNight = 150.0,
+            totalAmount = 450.0,
+            status = "En Attente",
+            transactionId = "MP260912.8942.A1",
+            operatorSelected = "M-Pesa",
+            paymentDate = "12/09/2026 à 14:20",
+            screenshotName = "recu_mpesa_450usd.png",
+            roomType = "Chambre Standard"
+        ),
+        Booking(
+            id = "BK-8935",
+            hotelId = "H1",
+            hotelName = "Goma Serena Hotel",
+            userId = "U3",
+            userName = "Nathalie Kanyere",
+            arrivalDate = "20/09/2026",
+            departureDate = "22/09/2026",
+            numNights = 2,
+            pricePerNight = 225.0,
+            totalAmount = 450.0,
+            status = "En Attente",
+            transactionId = "AIRTEL-TX-99214",
+            operatorSelected = "Airtel Money",
+            paymentDate = "12/09/2026 à 11:05",
+            screenshotName = "recu_airtel_450usd.png",
+            roomType = "Suite Deluxe"
+        ),
+        Booking(
+            id = "BK-8910",
+            hotelId = "H1",
+            hotelName = "Goma Serena Hotel",
+            userId = "U4",
+            userName = "Michel Kasongo",
+            arrivalDate = "10/09/2026",
+            departureDate = "12/09/2026",
+            numNights = 2,
+            pricePerNight = 150.0,
+            totalAmount = 300.0,
+            status = "Validé",
+            transactionId = "OM-RDC-77401",
+            operatorSelected = "Orange Money",
+            paymentDate = "09/09/2026 à 16:30",
+            screenshotName = "recu_orange_300usd.png",
+            roomType = "Chambre Standard"
+        )
+    )
+
     fun createRoomsForHotel(hotelId: String, basePrice: Double): List<Room> {
         return listOf(
             Room("R_${hotelId}_1", hotelId, "Chambre Standard", basePrice, true),
@@ -159,7 +216,7 @@ class BookZzzRepository(private val context: Context) {
         _hotels.value = if (hotelsJson != null) hotelListAdapter.fromJson(hotelsJson) ?: SampleData.hotels else SampleData.hotels
 
         val bookingsJson = sharedPrefs.getString("bookings_list", null)
-        _bookings.value = if (bookingsJson != null) bookingListAdapter.fromJson(bookingsJson) ?: emptyList() else emptyList()
+        _bookings.value = if (bookingsJson != null) bookingListAdapter.fromJson(bookingsJson) ?: SampleData.sampleBookings else SampleData.sampleBookings
         
         val roomsJson = sharedPrefs.getString("rooms_list", null)
         _rooms.value = if (roomsJson != null) roomListAdapter.fromJson(roomsJson) ?: emptyList() else SampleData.hotels.flatMap { SampleData.createRoomsForHotel(it.id, it.basePricePerNight) }

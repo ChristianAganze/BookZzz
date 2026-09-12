@@ -86,15 +86,52 @@ fun MainScreen(
                         "CLIENT" -> "client_dashboard"
                         "HOTEL_ADMIN" -> "hotel_admin_dashboard"
                         "SUPER_ADMIN" -> "super_admin_dashboard"
-                        else -> "auth"
+                        else -> "showcase"
                     }
                 } else {
-                    "auth"
+                    "showcase"
                 }
                 navController.navigate(dest) {
                     popUpTo("splash") { inclusive = true }
                 }
             })
+        }
+
+        composable("showcase") {
+            ShowcaseLandingScreen(
+                repository = repository,
+                onExploreClientClick = {
+                    navController.navigate("client_dashboard")
+                },
+                onPartnerLoginSuccess = { user ->
+                    Toast.makeText(context, "Bienvenue ${user.name} !", Toast.LENGTH_SHORT).show()
+                    val dest = if (user.registeredHotelName.isNullOrBlank()) {
+                        "partner_onboarding"
+                    } else {
+                        "hotel_admin_dashboard"
+                    }
+                    navController.navigate(dest)
+                }
+            )
+        }
+
+        composable("partner_onboarding") {
+            val user = repository.currentUser.value ?: UserProfile("U_TEMP", "Partenaire", "partenaire@bookzzz.com", "HotelAdmin")
+            PartnerOnboardingScreen(
+                currentUser = user,
+                repository = repository,
+                onOnboardingFinished = {
+                    Toast.makeText(context, "Établissement initialisé avec succès !", Toast.LENGTH_LONG).show()
+                    navController.navigate("hotel_admin_dashboard") {
+                        popUpTo("partner_onboarding") { inclusive = true }
+                    }
+                },
+                onCancel = {
+                    navController.navigate("showcase") {
+                        popUpTo("partner_onboarding") { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable("auth") {
@@ -122,16 +159,19 @@ fun MainScreen(
                 bookings = bookings,
                 onLogout = {
                     repository.logout()
-                    navController.navigate("auth") {
+                    navController.navigate("showcase") {
                         popUpTo("client_dashboard") { inclusive = true }
                     }
+                },
+                onOpenShowcase = {
+                    navController.navigate("showcase")
                 },
                 preferencesManager = preferencesManager
             )
         }
 
         composable("hotel_admin_dashboard") {
-            HotelAdminDashboard(
+            HotelAdminDashboardScreen(
                 repository = repository,
                 hotels = hotels,
                 bookings = bookings,
@@ -139,9 +179,12 @@ fun MainScreen(
                 currentUser = currentUser,
                 onLogout = {
                     repository.logout()
-                    navController.navigate("auth") {
+                    navController.navigate("showcase") {
                         popUpTo("hotel_admin_dashboard") { inclusive = true }
                     }
+                },
+                onOpenShowcase = {
+                    navController.navigate("showcase")
                 }
             )
         }
@@ -521,6 +564,7 @@ fun ClientDashboard(
     hotels: List<Hotel>,
     bookings: List<Booking>,
     onLogout: () -> Unit,
+    onOpenShowcase: () -> Unit = {},
     preferencesManager: PreferencesManager = PreferencesManager(LocalContext.current)
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -965,6 +1009,22 @@ fun ClientDashboard(
                                                 color = MaterialTheme.colorScheme.onPrimary,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 13.sp
+                                            )
+                                        }
+
+                                        IconButton(
+                                            onClick = onOpenShowcase,
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .background(Color(0xFF221C2B))
+                                                .border(1.dp, Color(0xFFCCA865).copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Language,
+                                                contentDescription = "Site Vitrine & Pro",
+                                                tint = Color(0xFFCCA865),
+                                                modifier = Modifier.size(20.dp)
                                             )
                                         }
 
