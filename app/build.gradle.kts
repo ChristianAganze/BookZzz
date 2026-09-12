@@ -28,12 +28,16 @@ android {
       keyAlias = "upload"
       keyPassword = System.getenv("KEY_PASSWORD")
     }
-    create("debugConfig") {
+    /*create("debugConfig") {
       storeFile = file("${rootDir}/debug.keystore")
       storePassword = "android"
       keyAlias = "androiddebugkey"
       keyPassword = "android"
-    }
+    }*/
+  }
+
+  buildFeatures {
+    compose = true
   }
 
   buildTypes {
@@ -44,7 +48,8 @@ android {
       signingConfig = signingConfigs.getByName("release")
     }
     debug {
-      signingConfig = signingConfigs.getByName("debugConfig")
+      // Laissez vide ou retirez la ligne signingConfig.
+      // Gradle signera automatiquement l'APK debug avec le keystore standard d'Android Studio !
     }
   }
   compileOptions {
