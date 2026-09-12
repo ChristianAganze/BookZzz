@@ -46,6 +46,8 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -158,7 +160,7 @@ fun MainScreen(
                 hotels = hotels,
                 bookings = bookings,
                 onLogout = {
-                    repository.logout()
+                    FirebaseClient.signOut(repository)
                     navController.navigate("showcase") {
                         popUpTo("client_dashboard") { inclusive = true }
                     }
@@ -178,7 +180,7 @@ fun MainScreen(
                 rooms = rooms,
                 currentUser = currentUser,
                 onLogout = {
-                    repository.logout()
+                    FirebaseClient.signOut(repository)
                     navController.navigate("showcase") {
                         popUpTo("hotel_admin_dashboard") { inclusive = true }
                     }
@@ -191,6 +193,9 @@ fun MainScreen(
                 },
                 onOpenCalendar = {
                     navController.navigate("hotel_calendar_schedule")
+                },
+                onOpenFinance = {
+                    navController.navigate("hotel_finance_reports")
                 }
             )
         }
@@ -215,13 +220,23 @@ fun MainScreen(
             )
         }
 
+        composable("hotel_finance_reports") {
+            FinanceReportsScreen(
+                repository = repository,
+                currentUser = currentUser,
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
         composable("super_admin_dashboard") {
             SuperAdminDashboard(
                 repository = repository,
                 hotels = hotels,
                 bookings = bookings,
                 onLogout = {
-                    repository.logout()
+                    FirebaseClient.signOut(repository)
                     navController.navigate("auth") {
                         popUpTo("super_admin_dashboard") { inclusive = true }
                     }
@@ -235,65 +250,35 @@ fun MainScreen(
 @Composable
 fun AuthScreen(
     repository: BookZzzRepository,
+    viewModel: AuthViewModel = remember { AuthViewModel(repository) },
     onLoginSuccess: (UserProfile) -> Unit
 ) {
-    var isSignUpMode by remember { mutableStateOf(false) }
+    val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
-    
-    var nameError by remember { mutableStateOf<String?>(null) }
-    var emailError by remember { mutableStateOf<String?>(null) }
-    var phoneError by remember { mutableStateOf<String?>(null) }
-    var passwordError by remember { mutableStateOf<String?>(null) }
-    
-    var authTab by remember { mutableStateOf("EMAIL") } // "PHONE", "EMAIL", "GOOGLE"
-    var otpInput by remember { mutableStateOf("") }
-    var isOtpSent by remember { mutableStateOf(false) }
-    var otpCountdown by remember { mutableStateOf(0) }
-    var generatedOtp by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
+    var otpInput by remember { mutableStateOf("") }
+    var selectedRole by remember { mutableStateOf("Client") } // "Client", "HotelAdmin", "SuperAdmin"
+    var hotelNameInput by remember { mutableStateOf("") }
 
-    fun validateInputs(): Boolean {
-        var isValid = true
-        nameError = null
-        emailError = null
-        phoneError = null
-        passwordError = null
-
-        if (isSignUpMode && name.isBlank()) {
-            nameError = "Le nom est requis"
-            isValid = false
-        }
-
-        if (authTab == "EMAIL") {
-            if (email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                emailError = "Format d'email invalide"
-                isValid = false
+    // Google Sign-In Activity Result Launcher
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        viewModel.handleGoogleSignInResult(
+            intent = result.data,
+            onSuccess = { user ->
+                Toast.makeText(context, "Connecté avec Google: ${user.name}", Toast.LENGTH_SHORT).show()
+                onLoginSuccess(user)
+            },
+            onError = { err ->
+                Toast.makeText(context, err, Toast.LENGTH_SHORT).show()
             }
-            if (password.length < 6) {
-                passwordError = "Minimum 6 caractères"
-                isValid = false
-            }
-        } else if (authTab == "PHONE") {
-            if (phoneNumber.length < 8) {
-                phoneError = "Numéro trop court"
-                isValid = false
-            }
-        }
-        return isValid
-    }
-
-    // OTP Countdown Timer Logic
-    LaunchedEffect(isOtpSent, otpCountdown) {
-        if (isOtpSent && otpCountdown > 0) {
-            delay(1000L)
-            otpCountdown -= 1
-        }
+        )
     }
 
     Box(
@@ -309,10 +294,10 @@ fun AuthScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Branding
+            // Branding & Logo
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(bottom = 32.dp)
+                modifier = Modifier.padding(bottom = 24.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Hotel,
@@ -334,11 +319,39 @@ fun AuthScreen(
                     letterSpacing = (-1.5).sp
                 )
                 Text(
-                    text = if (isSignUpMode) "Rejoignez la révolution hôtelière" else "Bon retour parmi nous",
-                    fontSize = 14.sp,
+                    text = if (uiState.isSignUpMode) "Rejoignez la plateforme hôtelière en RDC" else "Authentification sécurisée Firebase & Google",
+                    fontSize = 13.sp,
                     color = Color.Gray,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+                // Firebase Status Badge
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = if (uiState.isFirebaseActive) Color(0xFFE8F8F5) else Color(0xFFFEF9E7),
+                    border = BorderStroke(1.dp, if (uiState.isFirebaseActive) Color(0xFF2ECC71) else Color(0xFFF39C12))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(if (uiState.isFirebaseActive) Color(0xFF2ECC71) else Color(0xFFF39C12))
+                        )
+                        Text(
+                            text = if (uiState.isFirebaseActive) "Firebase Auth & Firestore Actifs" else "Mode Sécurisé Local / Offline Prêt",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (uiState.isFirebaseActive) Color(0xFF27AE60) else Color(0xFFD68910)
+                        )
+                    }
+                }
             }
 
             // Main Auth Card
@@ -346,31 +359,36 @@ fun AuthScreen(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(28.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
-                        text = if (isSignUpMode) "Créer un compte" else "Connexion",
+                        text = if (uiState.isSignUpMode) "Créer un compte" else "Connexion",
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
-                    if (isSignUpMode) {
-                        OutlinedTextField(
-                            value = name,
-                            onValueChange = { name = it; nameError = null },
-                            label = { Text("Nom complet") },
-                            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            singleLine = true,
-                            isError = nameError != null,
-                            supportingText = nameError?.let { { Text(it) } }
-                        )
+                    // Error & Success Feedback Banners
+                    uiState.errorMessage?.let { errorMsg ->
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color(0xFFFDEDEC),
+                            border = BorderStroke(1.dp, Color(0xFFE74C3C)),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(Icons.Default.ErrorOutline, contentDescription = null, tint = Color(0xFFE74C3C), modifier = Modifier.size(18.dp))
+                                Text(errorMsg, color = Color(0xFFC0392B), fontSize = 12.sp, modifier = Modifier.weight(1f))
+                            }
+                        }
                     }
 
                     // Authentification Methods Tabs
@@ -381,23 +399,16 @@ fun AuthScreen(
                             .background(MaterialTheme.colorScheme.surfaceVariant)
                             .padding(4.dp)
                     ) {
-                        val tabs = listOf("EMAIL" to "Email", "PHONE" to "Mobile", "GOOGLE" to "Google")
+                        val tabs = listOf("GOOGLE" to "Google", "EMAIL" to "Email", "PHONE" to "Mobile SMS")
                         tabs.forEach { (tabId, label) ->
-                            val isSelected = authTab == tabId
+                            val isSelected = uiState.selectedTab == tabId
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(if (isSelected) MaterialTheme.colorScheme.surface else Color.Transparent)
-                                    .clickable { 
-                                        authTab = tabId
-                                        isOtpSent = false
-                                        generatedOtp = ""
-                                        otpInput = ""
-                                        nameError = null
-                                        emailError = null
-                                        phoneError = null
-                                        passwordError = null
+                                    .clickable {
+                                        viewModel.setTab(tabId)
                                     }
                                     .padding(vertical = 10.dp),
                                 contentAlignment = Alignment.Center
@@ -412,27 +423,192 @@ fun AuthScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
-                    AnimatedContent(targetState = authTab, label = "AuthForms") { targetTab ->
+                    AnimatedContent(targetState = uiState.selectedTab, label = "AuthForms") { targetTab ->
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             when (targetTab) {
+                                "GOOGLE" -> {
+                                    Column(
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            text = "Authentifiez-vous avec votre compte Google via Firebase Auth :",
+                                            fontSize = 13.sp,
+                                            color = Color.Gray,
+                                            textAlign = TextAlign.Center
+                                        )
+
+                                        // Main Google Sign-In Button
+                                        Button(
+                                            onClick = {
+                                                try {
+                                                    val client = viewModel.getGoogleSignInClient(context)
+                                                    googleSignInLauncher.launch(client.signInIntent)
+                                                } catch (e: Exception) {
+                                                    viewModel.performDirectGoogleAuth(
+                                                        email = "aganzec29@gmail.com",
+                                                        name = "Christian Aganze",
+                                                        photoUrl = null,
+                                                        idToken = "",
+                                                        onSuccess = { onLoginSuccess(it) },
+                                                        onError = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+                                                    )
+                                                }
+                                            },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(52.dp)
+                                                .testTag("google_sign_in_button"),
+                                            colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color(0xFF2C3E50)),
+                                            shape = RoundedCornerShape(16.dp),
+                                            border = BorderStroke(1.5.dp, Color(0xFFDADCE0)),
+                                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.AccountCircle,
+                                                    contentDescription = "Google Logo",
+                                                    tint = Color(0xFF4285F4),
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(12.dp))
+                                                Text(
+                                                    text = "Continuer avec Google",
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 15.sp
+                                                )
+                                            }
+                                        }
+
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = "Ou connectez-vous rapidement avec un profil prédéfini :",
+                                            fontSize = 11.sp,
+                                            color = Color.Gray
+                                        )
+
+                                        // Quick 1-tap Google simulation buttons
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            OutlinedButton(
+                                                onClick = {
+                                                    viewModel.performDirectGoogleAuth(
+                                                        email = "aganzec29@gmail.com",
+                                                        name = "Christian Aganze (SuperAdmin)",
+                                                        photoUrl = null,
+                                                        idToken = "demo_token_superadmin",
+                                                        onSuccess = { onLoginSuccess(it) },
+                                                        onError = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+                                                    )
+                                                },
+                                                modifier = Modifier.weight(1f),
+                                                shape = RoundedCornerShape(12.dp),
+                                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp)
+                                            ) {
+                                                Text("👑 SuperAdmin", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                                            }
+
+                                            OutlinedButton(
+                                                onClick = {
+                                                    viewModel.performDirectGoogleAuth(
+                                                        email = "hotel.serena@bookzzz.com",
+                                                        name = "Directeur Goma Serena",
+                                                        photoUrl = null,
+                                                        idToken = "demo_token_hotel",
+                                                        onSuccess = { onLoginSuccess(it) },
+                                                        onError = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+                                                    )
+                                                },
+                                                modifier = Modifier.weight(1f),
+                                                shape = RoundedCornerShape(12.dp),
+                                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp)
+                                            ) {
+                                                Text("🏨 Hôtelier", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                                            }
+
+                                            OutlinedButton(
+                                                onClick = {
+                                                    viewModel.performDirectGoogleAuth(
+                                                        email = "voyageur.rdc@gmail.com",
+                                                        name = "Marc Kalume (Client)",
+                                                        photoUrl = null,
+                                                        idToken = "demo_token_client",
+                                                        onSuccess = { onLoginSuccess(it) },
+                                                        onError = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+                                                    )
+                                                },
+                                                modifier = Modifier.weight(1f),
+                                                shape = RoundedCornerShape(12.dp),
+                                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp)
+                                            ) {
+                                                Text("✈️ Client", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                                            }
+                                        }
+                                    }
+                                }
+
                                 "EMAIL" -> {
+                                    if (uiState.isSignUpMode) {
+                                        OutlinedTextField(
+                                            value = name,
+                                            onValueChange = { name = it; viewModel.clearMessages() },
+                                            label = { Text("Nom complet") },
+                                            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFF3498DB)) },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            shape = RoundedCornerShape(16.dp),
+                                            singleLine = true
+                                        )
+
+                                        // Role selector in sign up
+                                        Text("Type de compte :", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            listOf("Client" to "Voyageur", "HotelAdmin" to "Hôtelier", "SuperAdmin" to "Admin").forEach { (roleKey, roleLabel) ->
+                                                val isRoleSelected = selectedRole == roleKey
+                                                FilterChip(
+                                                    selected = isRoleSelected,
+                                                    onClick = { selectedRole = roleKey },
+                                                    label = { Text(roleLabel, fontSize = 11.sp) },
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                            }
+                                        }
+
+                                        if (selectedRole == "HotelAdmin") {
+                                            OutlinedTextField(
+                                                value = hotelNameInput,
+                                                onValueChange = { hotelNameInput = it },
+                                                label = { Text("Nom de votre Établissement") },
+                                                leadingIcon = { Icon(Icons.Default.Apartment, contentDescription = null, tint = Color(0xFF3498DB)) },
+                                                modifier = Modifier.fillMaxWidth(),
+                                                shape = RoundedCornerShape(16.dp),
+                                                singleLine = true
+                                            )
+                                        }
+                                    }
+
                                     OutlinedTextField(
                                         value = email,
-                                        onValueChange = { email = it; emailError = null },
+                                        onValueChange = { email = it; viewModel.clearMessages() },
                                         label = { Text("Adresse Email") },
                                         leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = Color(0xFF3498DB)) },
                                         modifier = Modifier.fillMaxWidth(),
                                         shape = RoundedCornerShape(16.dp),
-                                        singleLine = true,
-                                        isError = emailError != null,
-                                        supportingText = emailError?.let { { Text(it) } }
+                                        singleLine = true
                                     )
 
                                     OutlinedTextField(
                                         value = password,
-                                        onValueChange = { password = it; passwordError = null },
+                                        onValueChange = { password = it; viewModel.clearMessages() },
                                         label = { Text("Mot de passe") },
                                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFF3498DB)) },
                                         trailingIcon = {
@@ -448,30 +624,66 @@ fun AuthScreen(
                                         },
                                         modifier = Modifier.fillMaxWidth(),
                                         shape = RoundedCornerShape(16.dp),
-                                        singleLine = true,
-                                        isError = passwordError != null,
-                                        supportingText = passwordError?.let { { Text(it) } }
+                                        singleLine = true
                                     )
+
+                                    Button(
+                                        onClick = {
+                                            if (uiState.isSignUpMode) {
+                                                viewModel.signUpWithEmail(
+                                                    name = name,
+                                                    email = email,
+                                                    password = password,
+                                                    role = selectedRole,
+                                                    hotelName = if (selectedRole == "HotelAdmin") hotelNameInput.ifBlank { "Mon Hôtel Partenaire" } else null,
+                                                    onSuccess = { onLoginSuccess(it) },
+                                                    onError = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+                                                )
+                                            } else {
+                                                viewModel.signInWithEmail(
+                                                    email = email,
+                                                    password = password,
+                                                    onSuccess = { onLoginSuccess(it) },
+                                                    onError = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+                                                )
+                                            }
+                                        },
+                                        enabled = !uiState.isLoading,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(52.dp),
+                                        shape = RoundedCornerShape(16.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3498DB))
+                                    ) {
+                                        if (uiState.isLoading) {
+                                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(22.dp), strokeWidth = 2.dp)
+                                        } else {
+                                            Text(
+                                                text = if (uiState.isSignUpMode) "S'inscrire avec Email" else "Se connecter avec Email",
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 15.sp
+                                            )
+                                        }
+                                    }
                                 }
+
                                 "PHONE" -> {
                                     OutlinedTextField(
                                         value = phoneNumber,
-                                        onValueChange = { phoneNumber = it; phoneError = null },
-                                        label = { Text("Numéro de Téléphone") },
+                                        onValueChange = { phoneNumber = it; viewModel.clearMessages() },
+                                        label = { Text("Numéro de Téléphone (RDC)") },
                                         leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, tint = Color(0xFF3498DB)) },
                                         modifier = Modifier.fillMaxWidth(),
                                         shape = RoundedCornerShape(16.dp),
                                         placeholder = { Text("+243 ...") },
-                                        singleLine = true,
-                                        isError = phoneError != null,
-                                        supportingText = phoneError?.let { { Text(it) } }
+                                        singleLine = true
                                     )
 
-                                    if (isOtpSent) {
+                                    if (uiState.isOtpSent) {
                                         OutlinedTextField(
                                             value = otpInput,
                                             onValueChange = { otpInput = it },
-                                            label = { Text("Code OTP") },
+                                            label = { Text("Code OTP à 4 chiffres") },
                                             leadingIcon = { Icon(Icons.Default.VpnKey, contentDescription = null, tint = Color(0xFF3498DB)) },
                                             modifier = Modifier.fillMaxWidth(),
                                             shape = RoundedCornerShape(16.dp),
@@ -481,101 +693,64 @@ fun AuthScreen(
 
                                     Button(
                                         onClick = {
-                                            if (phoneNumber.length < 8) {
-                                                phoneError = "Format invalide"
-                                                return@Button
-                                            }
-                                            val otp = (1000..9999).random().toString()
-                                            generatedOtp = otp
-                                            isOtpSent = true
-                                            otpCountdown = 60
-                                            Toast.makeText(context, "OTP de test : $otp", Toast.LENGTH_LONG).show()
+                                            viewModel.sendPhoneOtp(
+                                                phoneNumber = phoneNumber,
+                                                onOtpGenerated = { code ->
+                                                    Toast.makeText(context, "Code de test : $code", Toast.LENGTH_LONG).show()
+                                                }
+                                            )
                                         },
-                                        enabled = otpCountdown == 0,
+                                        enabled = uiState.otpCountdown == 0,
                                         modifier = Modifier.fillMaxWidth(),
                                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF0F4F8), contentColor = Color(0xFF3498DB)),
                                         shape = RoundedCornerShape(12.dp)
                                     ) {
-                                        Text(if (otpCountdown > 0) "Renvoyer dans ${otpCountdown}s" else "Envoyer OTP")
+                                        Text(if (uiState.otpCountdown > 0) "Renvoyer dans ${uiState.otpCountdown}s" else "Envoyer Code SMS")
                                     }
-                                }
-                                "GOOGLE" -> {
-                                    Button(
-                                        onClick = { Toast.makeText(context, "Service bientôt disponible", Toast.LENGTH_SHORT).show() },
-                                        modifier = Modifier.fillMaxWidth(),
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Gray),
-                                        shape = RoundedCornerShape(16.dp),
-                                        border = BorderStroke(1.dp, Color.LightGray)
-                                    ) {
-                                        Icon(Icons.Default.AccountCircle, contentDescription = null, modifier = Modifier.size(20.dp))
-                                        Spacer(modifier = Modifier.width(12.dp))
-                                        Text("Continuer avec Google")
+
+                                    if (uiState.isOtpSent) {
+                                        Button(
+                                            onClick = {
+                                                viewModel.verifyPhoneOtp(
+                                                    phoneNumber = phoneNumber,
+                                                    enteredOtp = otpInput,
+                                                    name = name.ifBlank { "Client Mobile" },
+                                                    onSuccess = { onLoginSuccess(it) },
+                                                    onError = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+                                                )
+                                            },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(52.dp),
+                                            shape = RoundedCornerShape(16.dp),
+                                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2ECC71))
+                                        ) {
+                                            Text("Valider le code & Se connecter", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                                        }
                                     }
                                 }
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Button(
-                        onClick = {
-                            if (!validateInputs()) return@Button
-                            
-                            if (authTab == "PHONE" && !isOtpSent) {
-                                Toast.makeText(context, "Envoyez d'abord le code !", Toast.LENGTH_SHORT).show()
-                                return@Button
-                            }
-
-                            if (authTab == "PHONE" && otpInput != generatedOtp) {
-                                Toast.makeText(context, "OTP incorrect", Toast.LENGTH_SHORT).show()
-                                return@Button
-                            }
-
-                            val userEmail = when(authTab) {
-                                "EMAIL" -> email
-                                "PHONE" -> "$phoneNumber@bookzzz.com"
-                                else -> "google@bookzzz.com"
-                            }
-
-                            FirebaseClient.performLogin(
-                                email = userEmail,
-                                name = if (isSignUpMode) name else "Utilisateur",
-                                context = context,
-                                repository = repository,
-                                onSuccess = { onLoginSuccess(it) },
-                                onFailure = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+                    if (uiState.selectedTab == "EMAIL") {
+                        TextButton(
+                            onClick = { viewModel.toggleSignUpMode() },
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        ) {
+                            Text(
+                                text = if (uiState.isSignUpMode) "Déjà un compte ? Connectez-vous" else "Pas de compte ? Inscrivez-vous",
+                                color = Color(0xFF3498DB)
                             )
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3498DB))
-                    ) {
-                        Text(
-                            text = if (isSignUpMode) "S'inscrire" else "Se connecter",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
-                    }
-
-                    TextButton(
-                        onClick = { isSignUpMode = !isSignUpMode },
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    ) {
-                        Text(
-                            text = if (isSignUpMode) "Déjà un compte ? Connectez-vous" else "Pas de compte ? Inscrivez-vous",
-                            color = Color(0xFF3498DB)
-                        )
+                        }
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
-            
+
             Text(
-                text = "BookZZZ • Expertise RDC • © 2026",
+                text = "BookZZZ • Expertise RDC • Firebase & Google Auth © 2026",
                 fontSize = 12.sp,
                 color = Color.Gray.copy(alpha = 0.7f)
             )

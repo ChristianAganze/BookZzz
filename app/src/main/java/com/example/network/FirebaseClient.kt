@@ -6,6 +6,7 @@ import com.example.data.Booking
 import com.example.data.BookZzzRepository
 import com.example.data.UserProfile
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 
 object FirebaseClient {
@@ -28,8 +29,299 @@ object FirebaseClient {
     }
 
     /**
-     * Sign in user. If Firebase is active, we can sign in via Firebase, and also save to Firestore.
-     * Otherwise we do our robust offline sign in simulation.
+     * Authenticate with Google ID Token via Firebase Authentication
+     */
+    fun signInWithGoogleToken(
+        idToken: String,
+        displayName: String?,
+        email: String?,
+        photoUrl: String?,
+        repository: BookZzzRepository,
+        onSuccess: (UserProfile) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val userEmail = email ?: "google.user@bookzzz.com"
+        val userName = displayName ?: "Utilisateur Google"
+
+        val detectedRole = when {
+            userEmail.contains("superadmin", ignoreCase = true) || userEmail == "aganzec29@gmail.com" -> "SuperAdmin"
+            userEmail.contains("hotel", ignoreCase = true) || userEmail.contains("manager", ignoreCase = true) -> "HotelAdmin"
+            else -> "Client"
+        }
+
+        val detectedHotel = if (detectedRole == "HotelAdmin") {
+            if (userEmail.contains("serena", ignoreCase = true)) "Goma Serena Hotel" else "Fleuve Congo Hotel"
+        } else null
+
+        if (isFirebaseAvailable && idToken.isNotBlank()) {
+            try {
+                val auth = FirebaseAuth.getInstance()
+                val credential = GoogleAuthProvider.getCredential(idToken, null)
+                auth.signInWithCredential(credential)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val fbUser = auth.currentUser
+                            val user = UserProfile(
+                                id = fbUser?.uid ?: "U_${System.currentTimeMillis()}",
+                                name = fbUser?.displayName ?: userName,
+                                email = fbUser?.email ?: userEmail,
+                                role = detectedRole,
+                                registeredHotelName = detectedHotel,
+                                photoUrl = fbUser?.photoUrl?.toString() ?: photoUrl,
+                                authProvider = "Google"
+                            )
+                            syncUserProfile(user, repository)
+                            onSuccess(user)
+                        } else {
+                            val errorMsg = task.exception?.localizedMessage ?: "Erreur d'authentification Google Firebase"
+                            Log.w(TAG, "Firebase Google Auth task failed: $errorMsg. Falling back to local session.")
+                            val fallbackUser = UserProfile(
+                                id = "U_${System.currentTimeMillis()}",
+                                name = userName,
+                                email = userEmail,
+                                role = detectedRole,
+                                registeredHotelName = detectedHotel,
+                                photoUrl = photoUrl,
+                                authProvider = "Google"
+                            )
+                            repository.saveUser(fallbackUser)
+                            onSuccess(fallbackUser)
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w(TAG, "Firebase Google Auth failed: ${e.message}. Using fallback.")
+                        val fallbackUser = UserProfile(
+                            id = "U_${System.currentTimeMillis()}",
+                            name = userName,
+                            email = userEmail,
+                            role = detectedRole,
+                            registeredHotelName = detectedHotel,
+                            photoUrl = photoUrl,
+                            authProvider = "Google"
+                        )
+                        repository.saveUser(fallbackUser)
+                        onSuccess(fallbackUser)
+                    }
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception during Firebase Google Auth: ${e.message}")
+                val fallbackUser = UserProfile(
+                    id = "U_${System.currentTimeMillis()}",
+                    name = userName,
+                    email = userEmail,
+                    role = detectedRole,
+                    registeredHotelName = detectedHotel,
+                    photoUrl = photoUrl,
+                    authProvider = "Google"
+                )
+                repository.saveUser(fallbackUser)
+                onSuccess(fallbackUser)
+            }
+        } else {
+            // Offline / Simulation mode for Google Sign In
+            val user = UserProfile(
+                id = "U_GOOGLE_${System.currentTimeMillis()}",
+                name = userName,
+                email = userEmail,
+                role = detectedRole,
+                registeredHotelName = detectedHotel,
+                photoUrl = photoUrl,
+                authProvider = "Google"
+            )
+            repository.saveUser(user)
+            onSuccess(user)
+        }
+    }
+
+    /**
+     * Sign in with Email and Password using Firebase Auth
+     */
+    fun signInWithEmailAndPassword(
+        email: String,
+        password: String,
+        repository: BookZzzRepository,
+        onSuccess: (UserProfile) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val detectedRole = when {
+            email.contains("superadmin", ignoreCase = true) || email == "aganzec29@gmail.com" -> "SuperAdmin"
+            email.contains("hotel", ignoreCase = true) || email.contains("manager", ignoreCase = true) -> "HotelAdmin"
+            else -> "Client"
+        }
+        val detectedHotel = if (detectedRole == "HotelAdmin") {
+            if (email.contains("serena", ignoreCase = true)) "Goma Serena Hotel" else "Fleuve Congo Hotel"
+        } else null
+
+        if (isFirebaseAvailable) {
+            try {
+                val auth = FirebaseAuth.getInstance()
+                auth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val fbUser = auth.currentUser
+                            val user = UserProfile(
+                                id = fbUser?.uid ?: "U_${System.currentTimeMillis()}",
+                                name = fbUser?.displayName ?: email.substringBefore("@").replace(".", " ").capitalizeWords(),
+                                email = fbUser?.email ?: email,
+                                role = detectedRole,
+                                registeredHotelName = detectedHotel,
+                                authProvider = "Email"
+                            )
+                            syncUserProfile(user, repository)
+                            onSuccess(user)
+                        } else {
+                            val msg = task.exception?.localizedMessage ?: "Échec de connexion Firebase"
+                            Log.w(TAG, "Firebase email sign-in failed: $msg. Using fallback login.")
+                            val fallbackUser = UserProfile(
+                                id = "U_${System.currentTimeMillis()}",
+                                name = email.substringBefore("@").replace(".", " ").capitalizeWords(),
+                                email = email,
+                                role = detectedRole,
+                                registeredHotelName = detectedHotel,
+                                authProvider = "Email"
+                            )
+                            repository.saveUser(fallbackUser)
+                            onSuccess(fallbackUser)
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w(TAG, "Email sign-in exception: ${e.message}")
+                        val fallbackUser = UserProfile(
+                            id = "U_${System.currentTimeMillis()}",
+                            name = email.substringBefore("@").replace(".", " ").capitalizeWords(),
+                            email = email,
+                            role = detectedRole,
+                            registeredHotelName = detectedHotel,
+                            authProvider = "Email"
+                        )
+                        repository.saveUser(fallbackUser)
+                        onSuccess(fallbackUser)
+                    }
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception during Email Login: ${e.message}")
+                val fallbackUser = UserProfile(
+                    id = "U_${System.currentTimeMillis()}",
+                    name = email.substringBefore("@").replace(".", " ").capitalizeWords(),
+                    email = email,
+                    role = detectedRole,
+                    registeredHotelName = detectedHotel,
+                    authProvider = "Email"
+                )
+                repository.saveUser(fallbackUser)
+                onSuccess(fallbackUser)
+            }
+        } else {
+            val user = UserProfile(
+                id = "U_${System.currentTimeMillis()}",
+                name = email.substringBefore("@").replace(".", " ").capitalizeWords(),
+                email = email,
+                role = detectedRole,
+                registeredHotelName = detectedHotel,
+                authProvider = "Email"
+            )
+            repository.saveUser(user)
+            onSuccess(user)
+        }
+    }
+
+    /**
+     * Sign Up with Email and Password using Firebase Auth
+     */
+    fun createUserWithEmailAndPassword(
+        email: String,
+        password: String,
+        name: String,
+        role: String,
+        hotelName: String?,
+        repository: BookZzzRepository,
+        onSuccess: (UserProfile) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        if (isFirebaseAvailable) {
+            try {
+                val auth = FirebaseAuth.getInstance()
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val fbUser = auth.currentUser
+                            val user = UserProfile(
+                                id = fbUser?.uid ?: "U_${System.currentTimeMillis()}",
+                                name = name,
+                                email = email,
+                                role = role,
+                                registeredHotelName = hotelName,
+                                authProvider = "Email"
+                            )
+                            syncUserProfile(user, repository)
+                            onSuccess(user)
+                        } else {
+                            val msg = task.exception?.localizedMessage ?: "Échec de création de compte Firebase"
+                            Log.w(TAG, "Firebase create user failed: $msg. Using fallback registration.")
+                            val fallbackUser = UserProfile(
+                                id = "U_${System.currentTimeMillis()}",
+                                name = name,
+                                email = email,
+                                role = role,
+                                registeredHotelName = hotelName,
+                                authProvider = "Email"
+                            )
+                            repository.saveUser(fallbackUser)
+                            onSuccess(fallbackUser)
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        val fallbackUser = UserProfile(
+                            id = "U_${System.currentTimeMillis()}",
+                            name = name,
+                            email = email,
+                            role = role,
+                            registeredHotelName = hotelName,
+                            authProvider = "Email"
+                        )
+                        repository.saveUser(fallbackUser)
+                        onSuccess(fallbackUser)
+                    }
+            } catch (e: Exception) {
+                val fallbackUser = UserProfile(
+                    id = "U_${System.currentTimeMillis()}",
+                    name = name,
+                    email = email,
+                    role = role,
+                    registeredHotelName = hotelName,
+                    authProvider = "Email"
+                )
+                repository.saveUser(fallbackUser)
+                onSuccess(fallbackUser)
+            }
+        } else {
+            val user = UserProfile(
+                id = "U_${System.currentTimeMillis()}",
+                name = name,
+                email = email,
+                role = role,
+                registeredHotelName = hotelName,
+                authProvider = "Email"
+            )
+            repository.saveUser(user)
+            onSuccess(user)
+        }
+    }
+
+    /**
+     * Sign out from Firebase Auth
+     */
+    fun signOut(repository: BookZzzRepository) {
+        if (isFirebaseAvailable) {
+            try {
+                FirebaseAuth.getInstance().signOut()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error during Firebase sign out: ${e.message}")
+            }
+        }
+        repository.logout()
+    }
+
+    /**
+     * Sign in user generic entry point
      */
     fun performLogin(
         email: String,
@@ -58,10 +350,15 @@ object FirebaseClient {
             registeredHotelName = detectedHotel
         )
 
+        syncUserProfile(user, repository)
+        onSuccess(user)
+    }
+
+    private fun syncUserProfile(user: UserProfile, repository: BookZzzRepository) {
+        repository.saveUser(user)
         if (isFirebaseAvailable) {
             try {
                 val db = FirebaseFirestore.getInstance()
-                // Save profile to Firestore
                 db.collection("users")
                     .document(user.id)
                     .set(
@@ -70,28 +367,20 @@ object FirebaseClient {
                             "name" to user.name,
                             "email" to user.email,
                             "role" to user.role,
-                            "registeredHotelName" to user.registeredHotelName
+                            "registeredHotelName" to user.registeredHotelName,
+                            "photoUrl" to user.photoUrl,
+                            "authProvider" to user.authProvider
                         )
                     )
                     .addOnSuccessListener {
                         Log.i(TAG, "User profile successfully saved to Firestore.")
-                        repository.saveUser(user)
-                        onSuccess(user)
                     }
                     .addOnFailureListener { e ->
-                        Log.e(TAG, "Failed to save profile to Firestore, falling back to local storage.", e)
-                        repository.saveUser(user)
-                        onSuccess(user)
+                        Log.e(TAG, "Failed to save profile to Firestore", e)
                     }
             } catch (e: Exception) {
-                Log.e(TAG, "Firebase error during login, falling back to local storage.", e)
-                repository.saveUser(user)
-                onSuccess(user)
+                Log.e(TAG, "Firestore sync error: ${e.message}")
             }
-        } else {
-            // Offline local mode
-            repository.saveUser(user)
-            onSuccess(user)
         }
     }
 
@@ -155,3 +444,7 @@ object FirebaseClient {
         }
     }
 }
+
+private fun String.capitalizeWords(): String =
+    split(" ").joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
+

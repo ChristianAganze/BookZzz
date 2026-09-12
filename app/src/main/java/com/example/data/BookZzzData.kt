@@ -15,7 +15,9 @@ data class UserProfile(
     val name: String,
     val email: String,
     val role: String, // "Client", "HotelAdmin", "SuperAdmin"
-    val registeredHotelName: String? = null // For HotelAdmin
+    val registeredHotelName: String? = null, // For HotelAdmin
+    val photoUrl: String? = null,
+    val authProvider: String = "Email" // "Google", "Email", "Phone", "Firebase"
 )
 
 data class Hotel(

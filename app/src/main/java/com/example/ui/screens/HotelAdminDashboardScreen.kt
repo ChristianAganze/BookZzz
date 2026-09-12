@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -127,7 +128,8 @@ fun HotelAdminDashboardScreen(
     onLogout: () -> Unit,
     onOpenShowcase: () -> Unit,
     onOpenCatalog: () -> Unit = {},
-    onOpenCalendar: () -> Unit = {}
+    onOpenCalendar: () -> Unit = {},
+    onOpenFinance: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
@@ -286,6 +288,23 @@ fun HotelAdminDashboardScreen(
                             text = "Catalogue",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    // Open Finance & Accounting
+                    IconButton(
+                        onClick = onOpenFinance,
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color(0xFF2ECC71).copy(alpha = 0.15f))
+                            .border(1.dp, Color(0xFF2ECC71).copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AccountBalance,
+                            contentDescription = "Finances & Comptabilité",
+                            tint = Color(0xFF2ECC71),
+                            modifier = Modifier.size(18.dp)
                         )
                     }
 
@@ -474,6 +493,67 @@ fun HotelAdminDashboardScreen(
                                 )
                             }
                         }
+                    }
+                }
+            }
+
+            // Finance & Accounting Shortcut Banner
+            item {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onOpenFinance() },
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color(0xFF2A2234),
+                    border = BorderStroke(1.dp, Color(0xFF2ECC71).copy(alpha = 0.6f))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Surface(
+                                modifier = Modifier.size(36.dp),
+                                shape = RoundedCornerShape(10.dp),
+                                color = Color(0xFF2ECC71).copy(alpha = 0.15f),
+                                border = BorderStroke(1.dp, Color(0xFF2ECC71))
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Default.AccountBalance,
+                                        contentDescription = null,
+                                        tint = Color(0xFF2ECC71),
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                            Column {
+                                Text(
+                                    text = "Comptabilité, Finances & Reversements",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = "Journal des encaissements, commissions (10%) & export du bilan",
+                                    fontSize = 10.sp,
+                                    color = Color(0xFFCCCCCC)
+                                )
+                            }
+                        }
+
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = Color(0xFF2ECC71),
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
                 }
             }
