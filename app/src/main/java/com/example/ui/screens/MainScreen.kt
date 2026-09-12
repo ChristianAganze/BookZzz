@@ -896,31 +896,51 @@ fun ClientDashboard(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Column {
-                                        val user = repository.currentUser.value
-                                        Text(
-                                            text = buildAnnotatedString {
-                                                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)) {
-                                                    append("Book")
-                                                }
-                                                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)) {
-                                                    append("ZZZ")
-                                                }
-                                            },
-                                            fontSize = 24.sp,
-                                            fontWeight = FontWeight.Black,
-                                            letterSpacing = (-1).sp
-                                        )
-                                        Text(
-                                            text = when (currentLanguage) {
-                                                "English" -> "Hello, ${user?.name ?: "Traveler"}"
-                                                "Swahili" -> "Jambo, ${user?.name ?: "Msafiri"}"
-                                                else -> "Bonjour, ${user?.name ?: "Voyageur"}"
-                                            },
-                                            fontWeight = FontWeight.SemiBold,
-                                            fontSize = 14.sp,
-                                            color = MaterialTheme.colorScheme.onBackground
-                                        )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        Surface(
+                                            shape = RoundedCornerShape(12.dp),
+                                            color = Color(0xFF221C2B),
+                                            border = BorderStroke(1.dp, Color(0xFFCCA865).copy(alpha = 0.5f)),
+                                            modifier = Modifier.size(44.dp)
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Hotel,
+                                                    contentDescription = "BookZzz Logo",
+                                                    tint = Color(0xFFCCA865),
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                            }
+                                        }
+                                        Column {
+                                            val user = repository.currentUser.value
+                                            Text(
+                                                text = buildAnnotatedString {
+                                                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)) {
+                                                        append("BOOK")
+                                                    }
+                                                    withStyle(style = SpanStyle(color = Color(0xFFCCA865), fontWeight = FontWeight.Black)) {
+                                                        append("ZZZ")
+                                                    }
+                                                },
+                                                fontSize = 22.sp,
+                                                fontWeight = FontWeight.Black,
+                                                letterSpacing = 0.5.sp
+                                            )
+                                            Text(
+                                                text = "L'art de bien dormir • ${when (currentLanguage) {
+                                                    "English" -> "Hello, ${user?.name ?: "Traveler"}"
+                                                    "Swahili" -> "Jambo, ${user?.name ?: "Msafiri"}"
+                                                    else -> "Bonjour, ${user?.name ?: "Voyageur"}"
+                                                }}",
+                                                fontWeight = FontWeight.Medium,
+                                                fontSize = 12.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
                                     }
 
                                     Row(
@@ -1856,44 +1876,46 @@ fun ClientDashboard(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(90.dp)
-                                                .clip(CircleShape)
-                                                .background(MaterialTheme.colorScheme.surface)
-                                                .border(2.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                                                .padding(12.dp),
-                                            contentAlignment = Alignment.Center
+                                        Surface(
+                                            modifier = Modifier.size(90.dp),
+                                            shape = CircleShape,
+                                            color = Color(0xFF221C2B),
+                                            border = BorderStroke(2.dp, Color(0xFFCCA865).copy(alpha = 0.6f)),
+                                            shadowElevation = 4.dp
                                         ) {
                                             Column(
                                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                                verticalArrangement = Arrangement.Center
+                                                verticalArrangement = Arrangement.Center,
+                                                modifier = Modifier.fillMaxSize().padding(8.dp)
                                             ) {
                                                 Icon(
-                                                    imageVector = Icons.Default.Landscape,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.size(24.dp)
+                                                    imageVector = Icons.Default.Hotel,
+                                                    contentDescription = "BookZzz",
+                                                    tint = Color(0xFFCCA865),
+                                                    modifier = Modifier.size(32.dp)
                                                 )
-                                                Spacer(modifier = Modifier.height(4.dp))
+                                                Spacer(modifier = Modifier.height(2.dp))
                                                 Text(
-                                                    text = "BookZzz",
-                                                    fontSize = 11.sp,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = MaterialTheme.colorScheme.onSurface
-                                                )
-                                                Icon(
-                                                    imageVector = Icons.Default.PinDrop,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.size(10.dp)
+                                                    text = "BOOKZZZ",
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.Black,
+                                                    color = Color(0xFFCCA865),
+                                                    letterSpacing = 1.sp
                                                 )
                                             }
                                         }
-                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Spacer(modifier = Modifier.height(10.dp))
+                                        Text(
+                                            text = "« L'art de bien dormir »",
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = Color(0xFFCCA865),
+                                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
                                         Text(
                                             text = localeFooter,
-                                            fontSize = 10.sp,
+                                            fontSize = 11.sp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                                         )
                                     }
