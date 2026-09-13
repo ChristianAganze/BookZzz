@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BookZZZ • Portail Administration & Partenaires Hôteliers RDC</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js for reports & statistics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#F0F7FF',
+              100: '#E0EFFF',
+              500: '#3498DB',
+              600: '#2980B9',
+              700: '#1F618D',
+              900: '#1A5276'
+            },
+            accent: {
+              gold: '#F39C12',
+              green: '#2ECC71',
+              red: '#E74C3C'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .glassmorphism {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+  <!-- ================= AUTHENTICATION VIEW ================= -->
+  <div id="authView" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-brand-900 to-slate-950 relative overflow-hidden">
+    <!-- Ambient glowing backgrounds -->
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-brand-500/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-accent-gold/20 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 relative z-10 border border-slate-100">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-500 text-white shadow-lg shadow-brand-500/30 mb-4">
+          <i data-lucide="hotel" class="w-8 h-8"></i>
+        </div>
+        <h1 class="text-3xl font-black tracking-tight text-slate-900">Book<span class="text-brand-500">ZZZ</span> <span class="text-xs uppercase bg-brand-100 text-brand-700 px-2 py-0.5 rounded-full font-bold ml-1">Admin Web</span></h1>
+        <p class="text-slate-500 text-sm mt-1">Portail de Gestion Hôtelière & Plateforme RDC</p>
+      </div>
+
+      <!-- Quick Role Switch / Profiles -->
+      <div class="mb-6 bg-slate-100 p-1.5 rounded-2xl flex text-xs font-semibold">
+        <button onclick="switchLoginRole('SuperAdmin')" id="roleBtnSuperAdmin" class="flex-1 py-2 rounded-xl transition-all duration-200 bg-white shadow-sm text-slate-900">
+          👑 SuperAdmin
+        </button>
+        <button onclick="switchLoginRole('HotelAdmin')" id="roleBtnHotelAdmin" class="flex-1 py-2 rounded-xl transition-all duration-200 text-slate-500 hover:text-slate-900">
+          🏨 Hôtelier
+        </button>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Adresse Email</label>
+          <div class="relative">
+            <i data-lucide="mail" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3"></i>
+            <input id="loginEmail" type="email" required value="aganzec29@gmail.com" class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 text-sm font-medium transition" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Mot de passe</label>
+          <div class="relative">
+            <i data-lucide="lock" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3"></i>
+            <input id="loginPassword" type="password" required value="••••••••" class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 text-sm font-medium transition" />
+          </div>
+        </div>
+
+        <div id="hotelSelectorContainer" class="hidden">
+          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Hôtel Géré</label>
+          <div class="relative">
+            <i data-lucide="building-2" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3"></i>
+            <select id="loginHotelSelect" class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 text-sm font-medium transition appearance-none bg-white">
+              <option value="Goma Serena Hotel">Goma Serena Hotel (Goma)</option>
+              <option value="Fleuve Congo Hotel">Fleuve Congo Hotel (Kinshasa)</option>
+              <option value="Grand Karavia Hotel">Grand Karavia Hotel (Lubumbashi)</option>
+              <option value="Hôtel Ihusi">Hôtel Ihusi (Goma)</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 px-4 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-lg shadow-brand-500/25 transition duration-200 flex items-center justify-center gap-2 mt-6">
+          <span>Se connecter au Dashboard</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Google 1-Tap button -->
+        <button type="button" onclick="handleGoogleSignIn()" class="w-full py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl transition duration-200 flex items-center justify-center gap-3 text-sm">
+          <svg class="w-5 h-5" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Continuer avec Google Workspace</span>
+        </button>
+      </form>
+
+      <div class="mt-6 pt-6 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+        <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Firebase & Cloud Synced</span>
+        <span>Version Web 2.4.0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MAIN DASHBOARD APPLICATION ================= -->
+  <div id="dashboardApp" class="hidden min-h-screen flex flex-col bg-slate-50">
+    
+    <!-- TOP NAVIGATION BAR -->
+    <header class="h-16 bg-white border-b border-slate-200 sticky top-0 z-40 px-6 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl bg-brand-500 text-white flex items-center justify-center shadow-md shadow-brand-500/30 font-black">
+            B
+          </div>
+          <span class="text-xl font-extrabold text-slate-900 tracking-tight">Book<span class="text-brand-500">ZZZ</span></span>
+        </div>
+
+        <span class="h-6 w-px bg-slate-200 mx-1"></span>
+
+        <span id="roleBadge" class="text-xs px-2.5 py-1 rounded-full font-bold bg-amber-100 text-amber-800 border border-amber-200">
+          👑 SuperAdmin
+        </span>
+
+        <a href="/web-admin/showcase.html" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-xl border border-brand-200 transition">
+          <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+          <span>Site Vitrine Panafricain</span>
+        </a>
+
+        <span id="activeHotelLabel" class="text-xs font-semibold text-slate-500 hidden items-center gap-1">
+          <i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-500"></i>
+          <span id="activeHotelNameText">Goma Serena Hotel</span>
+        </span>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <!-- Live Real-Time DB Pulse -->
+        <div class="hidden md:flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+          <span>Firestore Sync en Direct</span>
+        </div>
+
+        <!-- Notification Bell -->
+        <button class="relative p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition">
+          <i data-lucide="bell" class="w-5 h-5"></i>
+          <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
+        </button>
+
+        <!-- User Profile Dropdown / Sign Out -->
+        <div class="flex items-center gap-3 pl-2 border-l border-slate-200">
+          <div class="text-right hidden sm:block">
+            <div id="navUserName" class="text-xs font-bold text-slate-900">Christian Aganze</div>
+            <div id="navUserEmail" class="text-[10px] text-slate-400">aganzec29@gmail.com</div>
+          </div>
+          <div id="navUserAvatar" class="w-9 h-9 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-sm border-2 border-white shadow-sm">
+            CA
+          </div>
+          <button onclick="handleLogout()" title="Déconnexion" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition">
+            <i data-lucide="log-out" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- WORKSPACE BODY: SIDEBAR + MAIN CONTENT -->
+    <div class="flex-1 flex overflow-hidden">
+
+      <!-- SIDEBAR -->
+      <aside class="w-64 bg-white border-r border-slate-200 p-4 flex flex-col justify-between hidden md:flex shrink-0">
+        <div class="space-y-6">
+          <div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-2">Navigation Principale</div>
+            <nav class="space-y-1">
+              <button onclick="navigateTo('overview')" id="nav-overview" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition text-white bg-brand-500 shadow-sm shadow-brand-500/30">
+                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                <span>Vue d'ensemble</span>
+              </button>
+
+              <button onclick="navigateTo('bookings')" id="nav-bookings" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                <div class="flex items-center gap-3">
+                  <i data-lucide="calendar-check" class="w-4 h-4"></i>
+                  <span>Réservations</span>
+                </div>
+                <span id="pendingBookingsBadge" class="bg-amber-500 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">3</span>
+              </button>
+
+              <button onclick="navigateTo('rooms')" id="nav-rooms" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                <i data-lucide="bed-double" class="w-4 h-4"></i>
+                <span>Chambres & Tarifs</span>
+              </button>
+
+              <button onclick="navigateTo('payments')" id="nav-payments" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                <i data-lucide="credit-card" class="w-4 h-4"></i>
+                <span>Preuves de Paiement</span>
+              </button>
+
+              <button onclick="navigateTo('hotels')" id="nav-hotels" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                <i data-lucide="building" class="w-4 h-4"></i>
+                <span>Hôtels & Partenaires</span>
+              </button>
+
+              <button onclick="navigateTo('finance')" id="nav-finance" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                <i data-lucide="pie-chart" class="w-4 h-4"></i>
+                <span>Rapports Financiers</span>
+              </button>
+            </nav>
+          </div>
+
+          <div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-2">Support & Connectivité</div>
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs space-y-2">
+              <div class="flex items-center justify-between font-semibold text-slate-700">
+                <span>Région RDC</span>
+                <span class="text-brand-600">Kin / Goma / L'shi</span>
+              </div>
+              <div class="flex items-center justify-between text-slate-500">
+                <span>Paiements Mobiles</span>
+                <span class="font-bold text-slate-700">M-Pesa, Airtel, Orange</span>
+              </div>
+              <div class="flex items-center justify-between text-slate-500">
+                <span>Passerelle SMS</span>
+                <span class="text-emerald-600 font-semibold">Active (OTP)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 bg-gradient-to-br from-brand-50 to-slate-100 rounded-2xl border border-brand-100 text-xs">
+          <div class="font-bold text-slate-900 flex items-center gap-1.5 mb-1">
+            <i data-lucide="sparkles" class="w-4 h-4 text-brand-500"></i>
+            <span>BookZZZ Pro v2.4</span>
+          </div>
+          <p class="text-slate-500 text-[11px] leading-relaxed">Solution Hôtelière Haute Disponibilité en République Démocratique du Congo.</p>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT VIEWPORT -->
+      <main class="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+
+        <!-- ================= TAB 1: OVERVIEW ================= -->
+        <section id="view-overview" class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-2xl font-black text-slate-900 tracking-tight">Tableau de Bord Exécutif</h2>
+              <p class="text-sm text-slate-500">Aperçu en temps réel des opérations, réservations et encaissements RDC.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="refreshData()" class="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm transition">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Synchroniser Firestore</span>
+              </button>
+              <button onclick="exportReportCSV()" class="px-3.5 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-md shadow-brand-500/20 transition">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                <span>Exporter Rapport (CSV)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Metric Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+              <div class="flex items-center justify-between text-slate-500 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider">Chiffre d'Affaires</span>
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                  $
+                </div>
+              </div>
+              <div id="statRevenue" class="text-2xl font-black text-slate-900">$18,450.00</div>
+              <div class="flex items-center gap-1.5 text-xs text-emerald-600 font-semibold mt-1">
+                <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+                <span>+14.2% ce mois-ci</span>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+              <div class="flex items-center justify-between text-slate-500 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider">Réservations Totales</span>
+                <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
+                  <i data-lucide="calendar" class="w-4 h-4"></i>
+                </div>
+              </div>
+              <div id="statBookings" class="text-2xl font-black text-slate-900">128</div>
+              <div class="flex items-center gap-1.5 text-xs text-brand-600 font-semibold mt-1">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                <span>94 confirmées</span>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+              <div class="flex items-center justify-between text-slate-500 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider">Taux d'Occupation</span>
+                <div class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+                  %
+                </div>
+              </div>
+              <div id="statOccupancy" class="text-2xl font-black text-slate-900">82.4%</div>
+              <div class="flex items-center gap-1.5 text-xs text-purple-600 font-semibold mt-1">
+                <span>Pic le weekend (Goma & Kin)</span>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+              <div class="flex items-center justify-between text-slate-500 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider">Paiements en Attente</span>
+                <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                  <i data-lucide="clock" class="w-4 h-4"></i>
+                </div>
+              </div>
+              <div id="statPendingProofs" class="text-2xl font-black text-amber-600">3</div>
+              <div class="flex items-center gap-1.5 text-xs text-amber-600 font-semibold mt-1">
+                <span>Airtel Money & M-Pesa à valider</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts & Realtime feed Section -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Revenue Chart -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-bold text-slate-900">Évolution des Revenus & Réservations (USD)</h3>
+                <span class="text-xs text-slate-400">Derniers 6 mois</span>
+              </div>
+              <div class="h-64">
+                <canvas id="revenueOverviewChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Recent Activity Feed -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                <h3 class="text-base font-bold text-slate-900 mb-4">Flux des Activités Récentes</h3>
+                <div id="activityFeedList" class="space-y-3.5 text-xs">
+                  <!-- Feed items injected via JS -->
+                </div>
+              </div>
+              <button onclick="navigateTo('bookings')" class="w-full mt-4 py-2.5 text-center text-xs font-bold text-brand-600 bg-brand-50 hover:bg-brand-100 rounded-xl transition">
+                Voir toutes les réservations
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 2: BOOKINGS MANAGEMENT ================= -->
+        <section id="view-bookings" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-2xl font-black text-slate-900 tracking-tight">Gestion des Réservations</h2>
+              <p class="text-sm text-slate-500">Contrôlez les séjours, validez les statuts et notifiez les clients.</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <input type="text" id="bookingSearchInput" oninput="filterBookingsTable()" placeholder="Rechercher client, réf, hôtel..." class="px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-brand-500 w-64" />
+            </div>
+          </div>
+
+          <!-- Bookings Table -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                    <th class="p-4">Réf & Date</th>
+                    <th class="p-4">Client</th>
+                    <th class="p-4">Hôtel & Chambre</th>
+                    <th class="p-4">Dates Séjour</th>
+                    <th class="p-4">Montant</th>
+                    <th class="p-4">Paiement</th>
+                    <th class="p-4">Statut</th>
+                    <th class="p-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="bookingsTableBody" class="divide-y divide-slate-100">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 3: ROOMS & CATALOG ================= -->
+        <section id="view-rooms" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-2xl font-black text-slate-900 tracking-tight">Catalogue des Chambres & Suites</h2>
+              <p class="text-sm text-slate-500">Mettez à jour les prix, disponibilités et équipements en temps réel.</p>
+            </div>
+            <button onclick="openAddRoomModal()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-md shadow-brand-500/20 transition">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Ajouter une Chambre</span>
+            </button>
+          </div>
+
+          <div id="roomsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Room cards injected via JS -->
+          </div>
+        </section>
+
+        <!-- ================= TAB 4: PAYMENT PROOFS ================= -->
+        <section id="view-payments" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-2xl font-black text-slate-900 tracking-tight">Vérification des Preuves de Paiement</h2>
+              <p class="text-sm text-slate-500">Validez les bordereaux Airtel Money, M-Pesa, Orange Money et virements bancaires.</p>
+            </div>
+          </div>
+
+          <div id="paymentProofsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Payment Proof cards injected via JS -->
+          </div>
+        </section>
+
+        <!-- ================= TAB 5: HOTELS DIRECTORY (SUPERADMIN) ================= -->
+        <section id="view-hotels" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-2xl font-black text-slate-900 tracking-tight">Hôtels Partenaires RDC</h2>
+              <p class="text-sm text-slate-500">Gestion des établissements affiliés, commissions et conventions.</p>
+            </div>
+            <button onclick="openAddHotelModal()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-md shadow-brand-500/20 transition">
+              <i data-lucide="building-2" class="w-4 h-4"></i>
+              <span>Enregistrer un Hôtel Partenaire</span>
+            </button>
+          </div>
+
+          <div id="hotelsListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Injected via JS -->
+          </div>
+        </section>
+
+        <!-- ================= TAB 6: FINANCIAL REPORTS ================= -->
+        <section id="view-finance" class="hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-2xl font-black text-slate-900 tracking-tight">Rapports Financiers & Commissions</h2>
+              <p class="text-sm text-slate-500">Ventilation des encaissements par opérateur (Mobile Money) et répartition des commissions.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <h3 class="text-base font-bold text-slate-900 mb-4">Répartition des Canaux de Paiement en RDC</h3>
+              <div class="h-64 flex items-center justify-center">
+                <canvas id="paymentMethodsChart"></canvas>
+              </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <h3 class="text-base font-bold text-slate-900 mb-4">Commissions Plateforme vs Revenu Hôtelier</h3>
+              <div class="h-64 flex items-center justify-center">
+                <canvas id="commissionsChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: ADD / EDIT ROOM ================= -->
+  <div id="roomModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 id="roomModalTitle" class="text-lg font-extrabold text-slate-900">Ajouter une Chambre</h3>
+        <button onclick="closeRoomModal()" class="p-1 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleSaveRoom(event)" class="mt-4 space-y-3.5 text-xs font-semibold text-slate-700">
+        <div>
+          <label class="block mb-1">Nom / Type de Chambre</label>
+          <input type="text" id="roomNameInput" required placeholder="Ex: Suite Présidentielle Vue Lac" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-brand-500" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block mb-1">Prix par Nuit ($ USD)</label>
+            <input type="number" id="roomPriceInput" required min="10" placeholder="250" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-brand-500" />
+          </div>
+          <div>
+            <label class="block mb-1">Hôtel Associé</label>
+            <select id="roomHotelInput" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-brand-500 bg-white">
+              <option value="Goma Serena Hotel">Goma Serena Hotel</option>
+              <option value="Fleuve Congo Hotel">Fleuve Congo Hotel</option>
+              <option value="Grand Karavia Hotel">Grand Karavia Hotel</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block mb-1">Description & Équipements</label>
+          <textarea id="roomDescInput" rows="3" placeholder="Climatisation, WiFi très haut débit, vue panoramique..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-brand-500"></textarea>
+        </div>
+
+        <div class="flex items-center gap-2 pt-2">
+          <input type="checkbox" id="roomAvailableInput" checked class="w-4 h-4 text-brand-500 rounded border-slate-300" />
+          <label for="roomAvailableInput" class="text-xs font-medium text-slate-600">Disponible immédiatement à la réservation</label>
+        </div>
+
+        <div class="pt-4 flex items-center justify-end gap-3">
+          <button type="button" onclick="closeRoomModal()" class="px-4 py-2 text-slate-500 hover:bg-slate-100 rounded-xl font-bold">Annuler</button>
+          <button type="submit" class="px-5 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-md shadow-brand-500/20">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- APPLICATION LOGIC & MOCK DATA -->
+  <script>
+    // Global State
+    let currentUser = {
+      name: "Christian Aganze",
+      email: "aganzec29@gmail.com",
+      role: "SuperAdmin",
+      hotelName: null
+    };
+
+    let sampleHotels = [
+      { id: "h1", name: "Goma Serena Hotel", city: "Goma, Nord-Kivu", stars: 5, rating: 4.8, commission: "12%", roomsCount: 24, status: "Partenaire Actif", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&auto=format&fit=crop&q=80" },
+      { id: "h2", name: "Fleuve Congo Hotel", city: "Kinshasa, Gombe", stars: 5, rating: 4.9, commission: "15%", roomsCount: 42, status: "Partenaire Actif", image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600&auto=format&fit=crop&q=80" },
+      { id: "h3", name: "Grand Karavia Hotel", city: "Lubumbashi, H-Katanga", stars: 5, rating: 4.7, commission: "10%", roomsCount: 30, status: "Partenaire Actif", image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=600&auto=format&fit=crop&q=80" },
+      { id: "h4", name: "Hôtel Ihusi", city: "Goma, Bord du Lac", stars: 4, rating: 4.5, commission: "10%", roomsCount: 18, status: "En Validation", image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600&auto=format&fit=crop&q=80" }
+    ];
+
+    let sampleRooms = [
+      { id: "r1", hotel: "Goma Serena Hotel", name: "Suite Exécutive Vue Lac", price: 280, available: true, maxGuests: 2, image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=500&auto=format&fit=crop&q=80" },
+      { id: "r2", hotel: "Goma Serena Hotel", name: "Chambre Deluxe King", price: 190, available: true, maxGuests: 2, image: "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=500&auto=format&fit=crop&q=80" },
+      { id: "r3", hotel: "Fleuve Congo Hotel", name: "Suite Présidentielle Fleuve", price: 550, available: false, maxGuests: 4, image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=500&auto=format&fit=crop&q=80" },
+      { id: "r4", hotel: "Fleuve Congo Hotel", name: "Chambre Supérieure Business", price: 240, available: true, maxGuests: 2, image: "https://images.unsplash.com/photo-1591088398332-8a7791972843?w=500&auto=format&fit=crop&q=80" },
+      { id: "r5", hotel: "Grand Karavia Hotel", name: "Bungalow Tropical", price: 210, available: true, maxGuests: 3, image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=500&auto=format&fit=crop&q=80" }
+    ];
+
+    let sampleBookings = [
+      { id: "BKZ-9041", clientName: "Patrick Mwamba", email: "p.mwamba@katangamining.cd", phone: "+243 998 123 456", hotel: "Fleuve Congo Hotel", room: "Suite Présidentielle Fleuve", checkIn: "2026-09-15", checkOut: "2026-09-18", amount: 1650, paymentMethod: "M-Pesa (Vodacom)", status: "CONFIRMÉE", proofStatus: "VALIDÉE" },
+      { id: "BKZ-9042", clientName: "Sarah Kanyere", email: "sarah.k@unicef.org", phone: "+243 970 882 119", hotel: "Goma Serena Hotel", room: "Suite Exécutive Vue Lac", checkIn: "2026-09-20", checkOut: "2026-09-22", amount: 560, paymentMethod: "Airtel Money", status: "EN ATTENTE", proofStatus: "À VÉRIFIER" },
+      { id: "BKZ-9043", clientName: "Jean-Luc Banza", email: "jl.banza@rawbank.cd", phone: "+243 812 345 678", hotel: "Grand Karavia Hotel", room: "Bungalow Tropical", checkIn: "2026-09-25", checkOut: "2026-09-27", amount: 420, paymentMethod: "Orange Money", status: "CONFIRMÉE", proofStatus: "VALIDÉE" },
+      { id: "BKZ-9044", clientName: "Aline Muhindo", email: "aline.m@gmail.com", phone: "+243 854 112 334", hotel: "Goma Serena Hotel", room: "Chambre Deluxe King", checkIn: "2026-09-16", checkOut: "2026-09-17", amount: 190, paymentMethod: "Airtel Money", status: "EN ATTENTE", proofStatus: "À VÉRIFIER" }
+    ];
+
+    let revenueChartInstance = null;
+    let paymentChartInstance = null;
+    let commissionsChartInstance = null;
+
+    // Switch Role at Login
+    function switchLoginRole(role) {
+      const superBtn = document.getElementById('roleBtnSuperAdmin');
+      const hotelBtn = document.getElementById('roleBtnHotelAdmin');
+      const hotelSelectContainer = document.getElementById('hotelSelectorContainer');
+      const emailInput = document.getElementById('loginEmail');
+
+      if (role === 'SuperAdmin') {
+        superBtn.className = "flex-1 py-2 rounded-xl transition-all duration-200 bg-white shadow-sm text-slate-900";
+        hotelBtn.className = "flex-1 py-2 rounded-xl transition-all duration-200 text-slate-500 hover:text-slate-900";
+        hotelSelectContainer.classList.add('hidden');
+        emailInput.value = "aganzec29@gmail.com";
+      } else {
+        hotelBtn.className = "flex-1 py-2 rounded-xl transition-all duration-200 bg-white shadow-sm text-slate-900";
+        superBtn.className = "flex-1 py-2 rounded-xl transition-all duration-200 text-slate-500 hover:text-slate-900";
+        hotelSelectContainer.classList.remove('hidden');
+        emailInput.value = "manager.serena@bookzzz.com";
+      }
+    }
+
+    function handleLogin(e) {
+      if (e) e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const isHotel = !document.getElementById('hotelSelectorContainer').classList.contains('hidden');
+
+      currentUser = {
+        name: isHotel ? "Directeur Hôtelier" : "Christian Aganze",
+        email: email,
+        role: isHotel ? "HotelAdmin" : "SuperAdmin",
+        hotelName: isHotel ? document.getElementById('loginHotelSelect').value : null
+      };
+
+      document.getElementById('authView').classList.add('hidden');
+      document.getElementById('dashboardApp').classList.remove('hidden');
+
+      updateAppHeader();
+      renderAllViews();
+      initCharts();
+      lucide.createIcons();
+    }
+
+    function handleGoogleSignIn() {
+      handleLogin(null);
+    }
+
+    function handleLogout() {
+      document.getElementById('dashboardApp').classList.add('hidden');
+      document.getElementById('authView').classList.remove('hidden');
+    }
+
+    function updateAppHeader() {
+      document.getElementById('navUserName').textContent = currentUser.name;
+      document.getElementById('navUserEmail').textContent = currentUser.email;
+      document.getElementById('navUserAvatar').textContent = currentUser.name.split(' ').map(n=>n[0]).join('').substring(0,2);
+      
+      const roleBadge = document.getElementById('roleBadge');
+      const hotelLabel = document.getElementById('activeHotelLabel');
+
+      if (currentUser.role === 'SuperAdmin') {
+        roleBadge.textContent = "👑 SuperAdmin";
+        roleBadge.className = "text-xs px-2.5 py-1 rounded-full font-bold bg-amber-100 text-amber-800 border border-amber-200";
+        hotelLabel.classList.add('hidden');
+      } else {
+        roleBadge.textContent = "🏨 Manager Hôtelier";
+        roleBadge.className = "text-xs px-2.5 py-1 rounded-full font-bold bg-brand-100 text-brand-800 border border-brand-200";
+        hotelLabel.classList.remove('hidden');
+        document.getElementById('activeHotelNameText').textContent = currentUser.hotelName || "Goma Serena Hotel";
+      }
+    }
+
+    function navigateTo(tabId) {
+      const tabs = ['overview', 'bookings', 'rooms', 'payments', 'hotels', 'finance'];
+      tabs.forEach(t => {
+        const viewEl = document.getElementById(`view-${t}`);
+        const navEl = document.getElementById(`nav-${t}`);
+        if (viewEl) viewEl.classList.add('hidden');
+        if (navEl) {
+          navEl.className = "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-600 hover:bg-slate-100 hover:text-slate-900";
+        }
+      });
+
+      const activeView = document.getElementById(`view-${tabId}`);
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeView) activeView.classList.remove('hidden');
+      if (activeNav) {
+        activeNav.className = "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition text-white bg-brand-500 shadow-sm shadow-brand-500/30";
+      }
+      lucide.createIcons();
+    }
+
+    function renderAllViews() {
+      renderBookings();
+      renderRooms();
+      renderPaymentProofs();
+      renderHotels();
+      renderActivityFeed();
+    }
+
+    // Render Bookings Table
+    function renderBookings() {
+      const tbody = document.getElementById('bookingsTableBody');
+      const list = (currentUser.role === 'HotelAdmin') 
+        ? sampleBookings.filter(b => b.hotel === currentUser.hotelName)
+        : sampleBookings;
+
+      tbody.innerHTML = list.map(b => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-4 font-bold text-slate-900">
+            <div>${b.id}</div>
+            <div class="text-[10px] text-slate-400 font-normal">Enregistré le 12/09</div>
+          </td>
+          <td class="p-4">
+            <div class="font-bold text-slate-900">${b.clientName}</div>
+            <div class="text-[10px] text-slate-400">${b.phone}</div>
+          </td>
+          <td class="p-4">
+            <div class="font-semibold text-slate-800">${b.hotel}</div>
+            <div class="text-[11px] text-slate-500">${b.room}</div>
+          </td>
+          <td class="p-4">
+            <div class="font-medium">${b.checkIn} <span class="text-slate-400">→</span> ${b.checkOut}</div>
+          </td>
+          <td class="p-4 font-black text-slate-900">$${b.amount}</td>
+          <td class="p-4">
+            <span class="inline-flex items-center gap-1 font-semibold text-slate-700">
+              <span class="w-1.5 h-1.5 rounded-full ${b.paymentMethod.includes('M-Pesa') ? 'bg-red-500' : 'bg-brand-500'}"></span>
+              ${b.paymentMethod}
+            </span>
+          </td>
+          <td class="p-4">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${b.status === 'CONFIRMÉE' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+              ${b.status}
+            </span>
+          </td>
+          <td class="p-4 text-right space-x-1">
+            ${b.status !== 'CONFIRMÉE' ? `
+              <button onclick="confirmBooking('${b.id}')" class="px-2.5 py-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg text-[10px] shadow-sm transition">
+                Confirmer
+              </button>
+            ` : `
+              <button class="px-2.5 py-1 bg-slate-100 text-slate-400 rounded-lg text-[10px] cursor-not-allowed">
+                Validé
+              </button>
+            `}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function confirmBooking(id) {
+      const bk = sampleBookings.find(b => b.id === id);
+      if (bk) {
+        bk.status = "CONFIRMÉE";
+        bk.proofStatus = "VALIDÉE";
+        renderBookings();
+        renderPaymentProofs();
+        alert(`Réservation ${id} confirmée avec succès ! Notification SMS envoyée au client.`);
+      }
+    }
+
+    // Render Rooms Grid
+    function renderRooms() {
+      const grid = document.getElementById('roomsGrid');
+      const list = (currentUser.role === 'HotelAdmin') 
+        ? sampleRooms.filter(r => r.hotel === currentUser.hotelName)
+        : sampleRooms;
+
+      grid.innerHTML = list.map(r => `
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition">
+          <div class="h-44 bg-slate-100 relative">
+            <img src="${r.image}" alt="${r.name}" class="w-full h-full object-cover" />
+            <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-extrabold ${r.available ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}">
+              ${r.available ? 'Disponible' : 'Occupée'}
+            </span>
+            <div class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-xl text-white font-black text-xs">
+              $${r.price} <span class="font-normal text-[10px] text-slate-300">/ nuit</span>
+            </div>
+          </div>
+          <div class="p-5">
+            <div class="text-[11px] font-bold text-brand-600 mb-1">${r.hotel}</div>
+            <h4 class="text-base font-bold text-slate-900 mb-2">${r.name}</h4>
+            <div class="flex items-center justify-between text-xs text-slate-500 pt-3 border-t border-slate-100">
+              <span class="flex items-center gap-1.5"><i data-lucide="users" class="w-3.5 h-3.5"></i> Jusqu'à ${r.maxGuests} pers.</span>
+              <button onclick="toggleRoomStatus('${r.id}')" class="font-bold text-brand-600 hover:text-brand-800">
+                ${r.available ? 'Marquer Occupée' : 'Rendre Disponible'}
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function toggleRoomStatus(id) {
+      const room = sampleRooms.find(r => r.id === id);
+      if (room) {
+        room.available = !room.available;
+        renderRooms();
+      }
+    }
+
+    // Render Payment Proofs Grid
+    function renderPaymentProofs() {
+      const grid = document.getElementById('paymentProofsGrid');
+      grid.innerHTML = sampleBookings.map(b => `
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-slate-900">${b.id}</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${b.proofStatus === 'VALIDÉE' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+              ${b.proofStatus}
+            </span>
+          </div>
+          
+          <div class="bg-slate-50 p-3 rounded-xl space-y-1.5 text-xs text-slate-600">
+            <div class="flex justify-between"><span class="text-slate-400">Client :</span> <span class="font-bold text-slate-900">${b.clientName}</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Opérateur :</span> <span class="font-semibold text-brand-600">${b.paymentMethod}</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Montant :</span> <span class="font-black text-slate-900">$${b.amount} USD</span></div>
+          </div>
+
+          <div class="h-28 bg-slate-100 border border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center text-slate-400 text-xs">
+            <i data-lucide="file-check" class="w-6 h-6 mb-1 text-slate-500"></i>
+            <span>Bordereau / Transaction SMS ${b.id.replace('BKZ-','TXN-')}</span>
+          </div>
+
+          ${b.proofStatus !== 'VALIDÉE' ? `
+            <button onclick="confirmBooking('${b.id}')" class="w-full py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs shadow-sm transition">
+              Valider la preuve de paiement
+            </button>
+          ` : `
+            <div class="text-center text-xs font-bold text-emerald-600 py-1">Preuve conforme & Archivée</div>
+          `}
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    // Render Hotels List
+    function renderHotels() {
+      const container = document.getElementById('hotelsListContainer');
+      container.innerHTML = sampleHotels.map(h => `
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
+          <div class="flex items-start gap-4">
+            <img src="${h.image}" class="w-20 h-20 rounded-xl object-cover" />
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <h4 class="text-base font-bold text-slate-900">${h.name}</h4>
+                <span class="text-amber-500 text-xs font-bold">★ ${h.rating}</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-2"><i data-lucide="map-pin" class="w-3.5 h-3.5 inline text-brand-500"></i> ${h.city}</p>
+              <div class="flex gap-2">
+                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-semibold">${h.roomsCount} Chambres</span>
+                <span class="px-2 py-0.5 rounded-md bg-brand-50 text-brand-700 text-[10px] font-bold">Commission: ${h.commission}</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span class="font-bold ${h.status === 'Partenaire Actif' ? 'text-emerald-600' : 'text-amber-600'}">${h.status}</span>
+            <button class="font-bold text-brand-600 hover:underline">Gérer le contrat</button>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function renderActivityFeed() {
+      const list = document.getElementById('activityFeedList');
+      list.innerHTML = `
+        <div class="flex items-start gap-3">
+          <div class="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0"></div>
+          <div>
+            <span class="font-bold text-slate-900">Nouvelle réservation</span> payée via Airtel Money ($560 - Serena).
+            <div class="text-[10px] text-slate-400">Il y a 12 min</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-2 h-2 rounded-full bg-brand-500 mt-1.5 shrink-0"></div>
+          <div>
+            <span class="font-bold text-slate-900">Check-in validé</span> pour Patrick Mwamba (Fleuve Congo Hotel).
+            <div class="text-[10px] text-slate-400">Il y a 45 min</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0"></div>
+          <div>
+            <span class="font-bold text-slate-900">Preuve soumise</span> par Sarah Kanyere en attente de revue.
+            <div class="text-[10px] text-slate-400">Il y a 1h</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Initialize Chart.js
+    function initCharts() {
+      const ctxRev = document.getElementById('revenueOverviewChart')?.getContext('2d');
+      if (ctxRev) {
+        if (revenueChartInstance) revenueChartInstance.destroy();
+        revenueChartInstance = new Chart(ctxRev, {
+          type: 'line',
+          data: {
+            labels: ['Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept'],
+            datasets: [{
+              label: 'Revenus ($ USD)',
+              data: [11200, 14500, 13800, 16900, 19200, 18450],
+              borderColor: '#3498DB',
+              backgroundColor: 'rgba(52, 152, 219, 0.1)',
+              fill: true,
+              tension: 0.35,
+              borderWidth: 3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { grid: { color: '#F1F5F9' }, ticks: { font: { size: 10 } } },
+              x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+            }
+          }
+        });
+      }
+
+      const ctxPay = document.getElementById('paymentMethodsChart')?.getContext('2d');
+      if (ctxPay) {
+        if (paymentChartInstance) paymentChartInstance.destroy();
+        paymentChartInstance = new Chart(ctxPay, {
+          type: 'doughnut',
+          data: {
+            labels: ['M-Pesa (Vodacom)', 'Airtel Money', 'Orange Money', 'Cartes / Virements'],
+            datasets: [{
+              data: [45, 30, 15, 10],
+              backgroundColor: ['#E74C3C', '#E67E22', '#F39C12', '#3498DB']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } }
+          }
+        });
+      }
+
+      const ctxComm = document.getElementById('commissionsChart')?.getContext('2d');
+      if (ctxComm) {
+        if (commissionsChartInstance) commissionsChartInstance.destroy();
+        commissionsChartInstance = new Chart(ctxComm, {
+          type: 'bar',
+          data: {
+            labels: ['Fleuve Congo', 'Goma Serena', 'Grand Karavia', 'Hôtel Ihusi'],
+            datasets: [
+              { label: 'Revenu Hôtelier ($)', data: [8500, 5600, 3200, 1150], backgroundColor: '#2ECC71' },
+              { label: 'Commission BookZZZ ($)', data: [1275, 672, 320, 115], backgroundColor: '#3498DB' }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+            scales: {
+              y: { grid: { color: '#F1F5F9' }, ticks: { font: { size: 10 } } },
+              x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+            }
+          }
+        });
+      }
+    }
+
+    // Modal controls
+    function openAddRoomModal() {
+      document.getElementById('roomModal').classList.remove('hidden');
+    }
+    function closeRoomModal() {
+      document.getElementById('roomModal').classList.add('hidden');
+    }
+    function handleSaveRoom(e) {
+      e.preventDefault();
+      const name = document.getElementById('roomNameInput').value;
+      const price = parseFloat(document.getElementById('roomPriceInput').value);
+      const hotel = document.getElementById('roomHotelInput').value;
+      const available = document.getElementById('roomAvailableInput').checked;
+
+      sampleRooms.unshift({
+        id: `r_${Date.now()}`,
+        hotel: hotel,
+        name: name,
+        price: price,
+        available: available,
+        maxGuests: 2,
+        image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=500&auto=format&fit=crop&q=80"
+      });
+
+      closeRoomModal();
+      renderRooms();
+      alert("Chambre ajoutée avec succès au catalogue BookZZZ !");
+    }
+
+    function refreshData() {
+      alert("Données Firestore synchronisées avec succès !");
+    }
+
+    function exportReportCSV() {
+      let csvContent = "data:text/csv;charset=utf-8,Ref,Client,Hotel,Room,Amount,Payment,Status\n";
+      sampleBookings.forEach(b => {
+        csvContent += `${b.id},${b.clientName},${b.hotel},${b.room},${b.amount},${b.paymentMethod},${b.status}\n`;
+      });
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `bookzzz_rapport_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Auto init on load
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

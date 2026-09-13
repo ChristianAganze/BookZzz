@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BookZZZ • L'Hospitalité Africaine à Portée de Clic | Hôtels d'Exception en Afrique</title>
+  <meta name="description" content="Réservez les plus beaux hôtels, resorts et lodges d'Afrique. Solutions de paiement panafricaines (Mobile Money & Cartes) et portail de gestion hôtelière." />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#F0F7FF',
+              100: '#E0EFFF',
+              500: '#3498DB',
+              600: '#2980B9',
+              700: '#1F618D',
+              900: '#0F2C42'
+            },
+            africa: {
+              gold: '#F39C12',
+              warm: '#D35400',
+              emerald: '#27AE60',
+              terracotta: '#E67E22'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, rgba(15, 44, 66, 0.92) 0%, rgba(26, 82, 118, 0.85) 60%, rgba(243, 156, 18, 0.4) 100%);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- ================= TOP ANNOUNCEMENT BAR ================= -->
+  <div class="bg-gradient-to-r from-slate-950 via-brand-900 to-slate-900 text-white text-xs py-2 px-4 text-center font-medium flex items-center justify-center gap-3">
+    <span class="inline-flex items-center gap-1.5 bg-africa-gold/20 text-africa-gold px-2.5 py-0.5 rounded-full font-bold border border-africa-gold/30">
+      🌍 Expansion Panafricaine
+    </span>
+    <span>BookZZZ est désormais disponible dans 12 pays : RDC, Rwanda, Côte d'Ivoire, Sénégal, Kenya, Maroc...</span>
+    <a href="#partner-portal" class="underline hover:text-africa-gold transition hidden sm:inline">Devenir Hôtel Partenaire →</a>
+  </div>
+
+  <!-- ================= NAVBAR ================= -->
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs transition duration-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 to-brand-500 text-white flex items-center justify-center shadow-lg shadow-brand-500/30 font-black text-xl group-hover:scale-105 transition">
+          B
+        </div>
+        <div>
+          <span class="text-2xl font-black text-slate-900 tracking-tight">Book<span class="text-brand-500">ZZZ</span></span>
+          <span class="block text-[10px] font-extrabold uppercase tracking-widest text-africa-gold">Africa Hospitality</span>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
+        <a href="#destinations" class="hover:text-brand-600 transition flex items-center gap-1">Destinations</a>
+        <a href="#hotels" class="hover:text-brand-600 transition">Hôtels d'Exception</a>
+        <a href="#partner-flow" class="hover:text-brand-600 transition">Flow Hôtelier Pro</a>
+        <a href="#payments" class="hover:text-brand-600 transition">Paiements Panafricains</a>
+        <a href="#testimonials" class="hover:text-brand-600 transition">Témoignages</a>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3">
+        <a href="/web-admin/index.html" class="px-4 py-2.5 rounded-xl border border-slate-200 hover:border-brand-500 text-slate-700 hover:text-brand-600 text-xs font-bold transition flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-4 h-4 text-brand-500"></i>
+          <span>Portail Manager</span>
+        </a>
+        <a href="#search-bar" class="px-5 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold shadow-md shadow-brand-500/25 transition flex items-center gap-2">
+          <i data-lucide="search" class="w-4 h-4"></i>
+          <span>Réserver un Séjour</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= HERO SECTION ================= -->
+  <section class="relative min-h-[640px] flex items-center justify-center bg-cover bg-center overflow-hidden" style="background-image: url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1600&auto=format&fit=crop&q=80');">
+    <div class="absolute inset-0 hero-gradient"></div>
+
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-20">
+      <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full text-white text-xs font-semibold mb-6">
+        <span class="w-2 h-2 rounded-full bg-africa-gold animate-ping"></span>
+        <span>Plus de 500 hôtels de prestige à travers l'Afrique</span>
+      </div>
+
+      <h1 class="text-4xl sm:text-6xl font-black text-white tracking-tight leading-tight mb-6">
+        Vivez la Magie de l'Afrique dans les Meilleurs Hôtels & Resorts
+      </h1>
+      <p class="text-lg sm:text-xl text-slate-200 max-w-3xl mx-auto font-normal leading-relaxed mb-10">
+        De Kinshasa à Kigali, d'Abidjan à Nairobi, de Dakar à Zanzibar. Réservez instantanément avec vos devises locales (M-Pesa, Orange Money, Wave, Airtel Money, Cartes Bancaires).
+      </p>
+
+      <!-- SEARCH BAR WIDGET -->
+      <div id="search-bar" class="bg-white p-4 sm:p-5 rounded-3xl shadow-2xl border border-slate-100 max-w-4xl mx-auto text-left">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          
+          <!-- Destination Input -->
+          <div class="sm:col-span-1 border-b sm:border-b-0 sm:border-r border-slate-200 pb-3 sm:pb-0 sm:pr-4">
+            <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Destination / Ville</label>
+            <div class="flex items-center gap-2">
+              <i data-lucide="map-pin" class="w-4 h-4 text-brand-500 shrink-0"></i>
+              <select class="w-full text-sm font-bold text-slate-900 focus:outline-none bg-transparent">
+                <option value="all">Toutes destinations</option>
+                <option value="goma">Goma & Kinshasa (RDC)</option>
+                <option value="kigali">Kigali (Rwanda)</option>
+                <option value="abidjan">Abidjan (Côte d'Ivoire)</option>
+                <option value="dakar">Dakar (Sénégal)</option>
+                <option value="nairobi">Nairobi (Kenya)</option>
+                <option value="marrakech">Marrakech (Maroc)</option>
+                <option value="zanzibar">Zanzibar (Tanzanie)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Date Arrivée / Départ -->
+          <div class="sm:col-span-1 border-b sm:border-b-0 sm:border-r border-slate-200 pb-3 sm:pb-0 sm:pr-4">
+            <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Dates de Séjour</label>
+            <div class="flex items-center gap-2">
+              <i data-lucide="calendar" class="w-4 h-4 text-brand-500 shrink-0"></i>
+              <input type="text" placeholder="15 Sept - 20 Sept" class="w-full text-sm font-bold text-slate-900 focus:outline-none bg-transparent" />
+            </div>
+          </div>
+
+          <!-- Voyageurs & Chambres -->
+          <div class="sm:col-span-1 border-b sm:border-b-0 sm:border-r border-slate-200 pb-3 sm:pb-0 sm:pr-4">
+            <label class="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Voyageurs</label>
+            <div class="flex items-center gap-2">
+              <i data-lucide="users" class="w-4 h-4 text-brand-500 shrink-0"></i>
+              <select class="w-full text-sm font-bold text-slate-900 focus:outline-none bg-transparent">
+                <option>2 Adultes • 1 Chambre</option>
+                <option>1 Adulte • 1 Chambre</option>
+                <option>Famille (4 pers.)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Search CTA -->
+          <div class="sm:col-span-1 flex items-center">
+            <button class="w-full h-full min-h-[48px] bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-2xl shadow-lg shadow-brand-500/30 transition flex items-center justify-center gap-2 text-sm">
+              <i data-lucide="search" class="w-4 h-4"></i>
+              <span>Explorer</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= KEY STATS BAR ================= -->
+  <section class="bg-white border-b border-slate-200 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-slate-100">
+        <div class="pt-4 md:pt-0">
+          <div class="text-3xl sm:text-4xl font-black text-slate-900">12+</div>
+          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Pays Panafricains</div>
+        </div>
+        <div class="pt-4 md:pt-0">
+          <div class="text-3xl sm:text-4xl font-black text-brand-600">550+</div>
+          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Hôtels & Lodges Affiliés</div>
+        </div>
+        <div class="pt-4 md:pt-0">
+          <div class="text-3xl sm:text-4xl font-black text-africa-gold">99.4%</div>
+          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Paiements Validés (SMS/API)</div>
+        </div>
+        <div class="pt-4 md:pt-0">
+          <div class="text-3xl sm:text-4xl font-black text-emerald-600">45k+</div>
+          <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Voyageurs Accueillis</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TOP PAN-AFRICAN DESTINATIONS ================= -->
+  <section id="destinations" class="py-20 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+        <div>
+          <div class="text-xs font-black uppercase tracking-widest text-africa-gold mb-2">Destinations Phares</div>
+          <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Explorez les Joyaux du Continent</h2>
+        </div>
+        <p class="text-slate-500 text-sm max-w-md mt-4 md:mt-0">
+          Des escapades urbaines vibrantes aux safaris inoubliables et retraites lacustres en Afrique centrale, de l'Ouest et de l'Est.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Card 1: Goma & Lac Kivu (RDC) -->
+        <div class="group relative rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition duration-300 h-80">
+          <img src="https://images.unsplash.com/photo-1516426122078-c23e76319801?w=600&auto=format&fit=crop&q=80" alt="Goma & Lac Kivu" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+          <div class="absolute bottom-5 left-5 right-5 text-white">
+            <span class="px-2.5 py-1 rounded-full bg-brand-500 text-[10px] font-black uppercase">RDC</span>
+            <h3 class="text-xl font-black mt-2">Goma & Lac Kivu</h3>
+            <p class="text-xs text-slate-300">Lodges volcaniques & hôtels de bord de lac</p>
+          </div>
+        </div>
+
+        <!-- Card 2: Kigali (Rwanda) -->
+        <div class="group relative rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition duration-300 h-80">
+          <img src="https://images.unsplash.com/photo-1580618672591-eb180b1a973f?w=600&auto=format&fit=crop&q=80" alt="Kigali Rwanda" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+          <div class="absolute bottom-5 left-5 right-5 text-white">
+            <span class="px-2.5 py-1 rounded-full bg-africa-gold text-slate-950 text-[10px] font-black uppercase">Rwanda</span>
+            <h3 class="text-xl font-black mt-2">Kigali Heights</h3>
+            <p class="text-xs text-slate-300">Capitale éco-responsable & hôtels business</p>
+          </div>
+        </div>
+
+        <!-- Card 3: Abidjan (Côte d'Ivoire) -->
+        <div class="group relative rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition duration-300 h-80">
+          <img src="https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=600&auto=format&fit=crop&q=80" alt="Abidjan Côte d'Ivoire" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+          <div class="absolute bottom-5 left-5 right-5 text-white">
+            <span class="px-2.5 py-1 rounded-full bg-africa-terracotta text-white text-[10px] font-black uppercase">Côte d'Ivoire</span>
+            <h3 class="text-xl font-black mt-2">Abidjan Plateau</h3>
+            <p class="text-xs text-slate-300">Perle des lagunes & resorts balnéaires</p>
+          </div>
+        </div>
+
+        <!-- Card 4: Zanzibar & Nairobi -->
+        <div class="group relative rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition duration-300 h-80">
+          <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600&auto=format&fit=crop&q=80" alt="Zanzibar & Nairobi" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+          <div class="absolute bottom-5 left-5 right-5 text-white">
+            <span class="px-2.5 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-black uppercase">Afrique de l'Est</span>
+            <h3 class="text-xl font-black mt-2">Zanzibar & Nairobi</h3>
+            <p class="text-xs text-slate-300">Eaux turquoise, safaris & grands palaces</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PARTNER FLOW : COMMENT FONCTIONNE L'ESPACE HÔTELIER ================= -->
+  <section id="partner-flow" class="py-20 bg-slate-900 text-white relative overflow-hidden">
+    <div class="absolute -right-40 -bottom-40 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="px-3 py-1 rounded-full bg-brand-500/20 text-brand-400 text-xs font-extrabold border border-brand-500/30 uppercase tracking-widest">
+          Architecture & Flow Hôtelier
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-black tracking-tight mt-4 mb-6">
+          Comment Fonctionne l'Espace Partenaire Hôtelier BookZZZ ?
+        </h2>
+        <p class="text-slate-400 text-base leading-relaxed">
+          Un écosystème conçu sur-mesure pour les directeurs d'hôtels, managers de réception et services comptables en Afrique.
+        </p>
+      </div>
+
+      <!-- Flow Steps Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        
+        <!-- Step 1 -->
+        <div class="bg-slate-800/80 border border-slate-700/80 p-6 rounded-3xl relative">
+          <div class="w-12 h-12 rounded-2xl bg-brand-500 text-white font-black text-lg flex items-center justify-center mb-4 shadow-lg shadow-brand-500/30">
+            01
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Onboarding & Configuration</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            L'établissement s'enregistre, configure ses devises de règlement (USD, CDF, XOF, KES) et ses numéros marchands Mobile Money.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="bg-slate-800/80 border border-slate-700/80 p-6 rounded-3xl relative">
+          <div class="w-12 h-12 rounded-2xl bg-africa-gold text-slate-950 font-black text-lg flex items-center justify-center mb-4 shadow-lg shadow-africa-gold/30">
+            02
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Catalogue & Tarifs Dynamiques</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Mise à jour en temps réel des chambres disponibles, suites présidentielles, prix promotionnels et conditions de séjour.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="bg-slate-800/80 border border-slate-700/80 p-6 rounded-3xl relative">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white font-black text-lg flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/30">
+            03
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Validation des Paiements</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Réception des alertes instantanées : vérification automatique des bordereaux et transactions SMS Airtel, M-Pesa ou Wave.
+          </p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="bg-slate-800/80 border border-slate-700/80 p-6 rounded-3xl relative">
+          <div class="w-12 h-12 rounded-2xl bg-purple-500 text-white font-black text-lg flex items-center justify-center mb-4 shadow-lg shadow-purple-500/30">
+            04
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Clôture & Rapports Financiers</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Export comptable des commissions en 1 clic (CSV/Excel), suivi du taux d'occupation et archivage sécurisé sur Firestore.
+          </p>
+        </div>
+      </div>
+
+      <!-- Live CTA for Portal -->
+      <div class="mt-12 text-center">
+        <a href="/web-admin/index.html" class="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-extrabold text-sm shadow-xl shadow-brand-500/30 transition">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+          <span>Accéder au Portail Partenaire Web (Live Demo)</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PAN-AFRICAN PAYMENT ECOSYSTEM ================= -->
+  <section id="payments" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-xs font-black uppercase tracking-widest text-brand-600">Inclusion Financière Totale</span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mt-2 mb-4">
+          Paiements Adaptés aux Réalités du Voyageur Africain
+        </h2>
+        <p class="text-slate-500 text-sm">
+          Fini les blocages bancaires à l'étranger. Réservez et payez en toute simplicité avec les moyens les plus populaires du continent.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <!-- M-Pesa -->
+        <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col items-center text-center">
+          <div class="w-12 h-12 rounded-xl bg-red-600 text-white font-black flex items-center justify-center mb-3">M</div>
+          <span class="font-bold text-xs text-slate-900">M-Pesa</span>
+          <span class="text-[10px] text-slate-400">RDC • Kenya • Tanzanie</span>
+        </div>
+
+        <!-- Airtel Money -->
+        <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col items-center text-center">
+          <div class="w-12 h-12 rounded-xl bg-red-500 text-white font-black flex items-center justify-center mb-3">A</div>
+          <span class="font-bold text-xs text-slate-900">Airtel Money</span>
+          <span class="text-[10px] text-slate-400">14 Pays Africains</span>
+        </div>
+
+        <!-- Orange Money -->
+        <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col items-center text-center">
+          <div class="w-12 h-12 rounded-xl bg-orange-500 text-white font-black flex items-center justify-center mb-3">OM</div>
+          <span class="font-bold text-xs text-slate-900">Orange Money</span>
+          <span class="text-[10px] text-slate-400">RDC • Côte d'Ivoire • Sénégal</span>
+        </div>
+
+        <!-- Wave Mobile -->
+        <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col items-center text-center">
+          <div class="w-12 h-12 rounded-xl bg-sky-400 text-white font-black flex items-center justify-center mb-3">W</div>
+          <span class="font-bold text-xs text-slate-900">Wave</span>
+          <span class="text-[10px] text-slate-400">Sénégal • Côte d'Ivoire</span>
+        </div>
+
+        <!-- MTN MoMo -->
+        <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col items-center text-center">
+          <div class="w-12 h-12 rounded-xl bg-yellow-400 text-slate-900 font-black flex items-center justify-center mb-3">Mo</div>
+          <span class="font-bold text-xs text-slate-900">MTN MoMo</span>
+          <span class="text-[10px] text-slate-400">Rwanda • Ghana • Cameroun</span>
+        </div>
+
+        <!-- Visa / Mastercard -->
+        <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col items-center text-center">
+          <div class="w-12 h-12 rounded-xl bg-slate-900 text-white font-black flex items-center justify-center mb-3">💳</div>
+          <span class="font-bold text-xs text-slate-900">Visa / Mastercard</span>
+          <span class="text-[10px] text-slate-400">International & Diaspora</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TESTIMONIALS ================= -->
+  <section id="testimonials" class="py-20 bg-slate-50 border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-xs font-black uppercase tracking-widest text-africa-gold">Confiance & Excellence</span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mt-2 mb-4">
+          Ce que disent nos Hôtels Partenaires & Voyageurs
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-xs flex flex-col justify-between">
+          <p class="text-slate-600 text-sm italic leading-relaxed mb-6">
+            "Depuis l'intégration de BookZZZ, nous avons augmenté de 40% nos réservations directes en provenance de la sous-région des Grands Lacs et de la diaspora."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-sm">GS</div>
+            <div>
+              <div class="font-bold text-xs text-slate-900">Direction Générale</div>
+              <div class="text-[10px] text-slate-400">Goma Serena Hotel (RDC)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-xs flex flex-col justify-between">
+          <p class="text-slate-600 text-sm italic leading-relaxed mb-6">
+            "Le flow de validation des paiements Mobile Money (M-Pesa & Airtel) est un gain de temps inestimable pour notre équipe de réception. Zéro litige."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-africa-gold/20 text-africa-warm font-bold flex items-center justify-center text-sm">FC</div>
+            <div>
+              <div class="font-bold text-xs text-slate-900">Manager de Réception</div>
+              <div class="text-[10px] text-slate-400">Fleuve Congo Hotel (Kinshasa)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-xs flex flex-col justify-between">
+          <p class="text-slate-600 text-sm italic leading-relaxed mb-6">
+            "Voyageant fréquemment entre Abidjan, Dakar et Kigali pour affaires, BookZZZ est la seule plateforme qui comprend les réalités de paiement en Afrique."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-sm">MK</div>
+            <div>
+              <div class="font-bold text-xs text-slate-900">Marc Kalume</div>
+              <div class="text-[10px] text-slate-400">Consultant en Investissements Panafricains</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CTA BANNER ================= -->
+  <section class="py-16 bg-gradient-to-r from-brand-900 via-slate-900 to-slate-950 text-white text-center relative overflow-hidden">
+    <div class="max-w-4xl mx-auto px-4 relative z-10">
+      <h2 class="text-3xl sm:text-4xl font-black mb-4">Vous Gérez un Hôtel ou un Lodge en Afrique ?</h2>
+      <p class="text-slate-300 text-sm max-w-2xl mx-auto mb-8">
+        Rejoignez le réseau BookZZZ et recevez dès aujourd'hui des réservations garanties avec paiements sécurisés et commission transparente.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="/web-admin/index.html" class="w-full sm:w-auto px-8 py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-2xl shadow-lg transition">
+          Ouvrir Mon Espace Partenaire
+        </a>
+        <a href="mailto:contact@bookzzz.com" class="w-full sm:w-auto px-8 py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl border border-white/20 transition">
+          Contacter notre Équipe Commerciale
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="bg-slate-950 text-slate-400 text-xs py-12 border-t border-slate-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      <div>
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-8 h-8 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold">B</div>
+          <span class="text-lg font-black text-white">Book<span class="text-brand-500">ZZZ</span></span>
+        </div>
+        <p class="text-slate-500 leading-relaxed">
+          Plateforme Panafricaine de Réservation Hôtelière et Solution de Gestion Intelligente pour les Établissements Touristiques en Afrique.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-white uppercase tracking-wider mb-3">Destinations</h4>
+        <ul class="space-y-2">
+          <li><a href="#" class="hover:text-white">RDC (Kinshasa, Goma, Lubumbashi)</a></li>
+          <li><a href="#" class="hover:text-white">Rwanda (Kigali, Gisenyi)</a></li>
+          <li><a href="#" class="hover:text-white">Côte d'Ivoire (Abidjan, San Pedro)</a></li>
+          <li><a href="#" class="hover:text-white">Sénégal & Kenya</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-white uppercase tracking-wider mb-3">Espace Professionnel</h4>
+        <ul class="space-y-2">
+          <li><a href="/web-admin/index.html" class="hover:text-white">Portail Manager Hôtelier</a></li>
+          <li><a href="/web-admin/index.html" class="hover:text-white">SuperAdmin Plateforme</a></li>
+          <li><a href="#" class="hover:text-white">Guide d'Intégration Mobile Money</a></li>
+          <li><a href="#" class="hover:text-white">Conditions Générales Partenaires</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-white uppercase tracking-wider mb-3">Sécurité & Conformité</h4>
+        <p class="text-slate-500 leading-relaxed mb-3">
+          Transactions cryptées de bout en bout. Intégrations bancaires certifiées PCI-DSS & passerelles Télécoms agréées.
+        </p>
+        <div class="flex items-center gap-2 text-emerald-400 font-semibold">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+          <span>Transactions 100% Sécurisées</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between text-slate-600">
+      <span>BookZZZ Africa Hospitality Corporation © 2026. Tous droits réservés.</span>
+      <span class="mt-2 sm:mt-0">Kinshasa • Goma • Kigali • Abidjan • Paris</span>
+    </div>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
