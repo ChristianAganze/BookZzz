@@ -43,15 +43,8 @@ object FirebaseClient {
         val userEmail = email ?: "google.user@bookzzz.com"
         val userName = displayName ?: "Utilisateur Google"
 
-        val detectedRole = when {
-            userEmail.contains("superadmin", ignoreCase = true) || userEmail == "aganzec29@gmail.com" -> "SuperAdmin"
-            userEmail.contains("hotel", ignoreCase = true) || userEmail.contains("manager", ignoreCase = true) -> "HotelAdmin"
-            else -> "Client"
-        }
-
-        val detectedHotel = if (detectedRole == "HotelAdmin") {
-            if (userEmail.contains("serena", ignoreCase = true)) "Goma Serena Hotel" else "Fleuve Congo Hotel"
-        } else null
+        val detectedRole = "Client"
+        val detectedHotel: String? = null
 
         if (isFirebaseAvailable && idToken.isNotBlank()) {
             try {
@@ -142,14 +135,8 @@ object FirebaseClient {
         onSuccess: (UserProfile) -> Unit,
         onFailure: (String) -> Unit
     ) {
-        val detectedRole = when {
-            email.contains("superadmin", ignoreCase = true) || email == "aganzec29@gmail.com" -> "SuperAdmin"
-            email.contains("hotel", ignoreCase = true) || email.contains("manager", ignoreCase = true) -> "HotelAdmin"
-            else -> "Client"
-        }
-        val detectedHotel = if (detectedRole == "HotelAdmin") {
-            if (email.contains("serena", ignoreCase = true)) "Goma Serena Hotel" else "Fleuve Congo Hotel"
-        } else null
+        val detectedRole = "Client"
+        val detectedHotel: String? = null
 
         if (isFirebaseAvailable) {
             try {
@@ -332,15 +319,8 @@ object FirebaseClient {
         onFailure: (String) -> Unit
     ) {
         // Advanced Role Detection Simulation
-        val detectedRole = when {
-            email.contains("superadmin", ignoreCase = true) || email == "aganzec29@gmail.com" -> "SuperAdmin"
-            email.contains("hotel", ignoreCase = true) || email.contains("manager", ignoreCase = true) -> "HotelAdmin"
-            else -> "Client"
-        }
-        
-        val detectedHotel = if (detectedRole == "HotelAdmin") {
-            if (email.contains("serena", ignoreCase = true)) "Goma Serena Hotel" else "Fleuve Congo Hotel"
-        } else null
+        val detectedRole = "Client"
+        val detectedHotel: String? = null
 
         val user = UserProfile(
             id = "U_${System.currentTimeMillis()}",
@@ -391,29 +371,52 @@ object FirebaseClient {
         if (!isFirebaseAvailable) return
         try {
             val db = FirebaseFirestore.getInstance()
+            val dateFormat = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+            val checkInDate = try { dateFormat.parse(booking.arrivalDate) } catch (e: Exception) { null }
+            val checkOutDate = try { dateFormat.parse(booking.departureDate) } catch (e: Exception) { null }
+
+            val bookingMap = hashMapOf<String, Any?>(
+                "id" to booking.id,
+                "hotelId" to booking.hotelId,
+                "hotelName" to booking.hotelName,
+                "roomId" to "room_default",
+                "roomName" to booking.roomType,
+                "guestId" to booking.userId,
+                "userId" to booking.userId,
+                "guestName" to booking.userName,
+                "userName" to booking.userName,
+                "guestPhone" to "",
+                "guestEmail" to "",
+                "checkIn" to (checkInDate ?: booking.arrivalDate),
+                "checkOut" to (checkOutDate ?: booking.departureDate),
+                "arrivalDate" to booking.arrivalDate,
+                "departureDate" to booking.departureDate,
+                "nights" to booking.numNights,
+                "numNights" to booking.numNights,
+                "adults" to 1,
+                "children" to 0,
+                "pricePerNight" to booking.pricePerNight,
+                "totalAmount" to booking.totalAmount,
+                "currency" to "USD",
+                "status" to "pending",
+                "rawStatus" to booking.status,
+                "paymentMethod" to (if (booking.operatorSelected.isNotBlank()) booking.operatorSelected else "MPESA"),
+                "paymentStatus" to "pending",
+                "transactionRef" to (if (booking.transactionId.isNotBlank()) booking.transactionId else booking.id),
+                "transactionId" to booking.transactionId,
+                "operatorSelected" to booking.operatorSelected,
+                "paymentDate" to booking.paymentDate,
+                "screenshotName" to booking.screenshotName,
+                "taxiRequested" to booking.taxiRequested,
+                "taxiStatus" to booking.taxiStatus,
+                "isWalkIn" to false,
+                "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
+                "updatedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+            )
+
             db.collection("bookings")
                 .document(booking.id)
-                .set(
-                    mapOf(
-                        "id" to booking.id,
-                        "hotelId" to booking.hotelId,
-                        "hotelName" to booking.hotelName,
-                        "userId" to booking.userId,
-                        "userName" to booking.userName,
-                        "arrivalDate" to booking.arrivalDate,
-                        "departureDate" to booking.departureDate,
-                        "numNights" to booking.numNights,
-                        "pricePerNight" to booking.pricePerNight,
-                        "totalAmount" to booking.totalAmount,
-                        "status" to booking.status,
-                        "transactionId" to booking.transactionId,
-                        "operatorSelected" to booking.operatorSelected,
-                        "paymentDate" to booking.paymentDate,
-                        "screenshotName" to booking.screenshotName,
-                        "taxiRequested" to booking.taxiRequested,
-                        "taxiStatus" to booking.taxiStatus
-                    )
-                )
+                .set(bookingMap, com.google.firebase.firestore.SetOptions.merge())
                 .addOnSuccessListener {
                     Log.i(TAG, "Booking saved to Firestore successfully.")
                 }

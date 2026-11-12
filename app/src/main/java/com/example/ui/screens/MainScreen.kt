@@ -55,10 +55,9 @@ import androidx.navigation.compose.rememberNavController
 // Navigation Targets
 enum class Screen {
     Splash,
+    Showcase,
     Auth,
-    ClientDashboard,
-    HotelAdminDashboard,
-    SuperAdminDashboard
+    ClientDashboard
 }
 
 @Composable
@@ -83,16 +82,7 @@ fun MainScreen(
         composable("splash") {
             SplashScreen(onTimeout = {
                 val user = repository.currentUser.value
-                val dest = if (user != null) {
-                    when (user.role.uppercase()) {
-                        "CLIENT" -> "client_dashboard"
-                        "HOTEL_ADMIN" -> "hotel_admin_dashboard"
-                        "SUPER_ADMIN" -> "super_admin_dashboard"
-                        else -> "showcase"
-                    }
-                } else {
-                    "showcase"
-                }
+                val dest = if (user != null) "client_dashboard" else "showcase"
                 navController.navigate(dest) {
                     popUpTo("splash") { inclusive = true }
                 }
@@ -104,34 +94,6 @@ fun MainScreen(
                 repository = repository,
                 onExploreClientClick = {
                     navController.navigate("client_dashboard")
-                },
-                onPartnerLoginSuccess = { user ->
-                    Toast.makeText(context, "Bienvenue ${user.name} !", Toast.LENGTH_SHORT).show()
-                    val dest = if (user.registeredHotelName.isNullOrBlank()) {
-                        "partner_onboarding"
-                    } else {
-                        "hotel_admin_dashboard"
-                    }
-                    navController.navigate(dest)
-                }
-            )
-        }
-
-        composable("partner_onboarding") {
-            val user = repository.currentUser.value ?: UserProfile("U_TEMP", "Partenaire", "partenaire@bookzzz.com", "HotelAdmin")
-            PartnerOnboardingScreen(
-                currentUser = user,
-                repository = repository,
-                onOnboardingFinished = {
-                    Toast.makeText(context, "Établissement initialisé avec succès !", Toast.LENGTH_LONG).show()
-                    navController.navigate("hotel_admin_dashboard") {
-                        popUpTo("partner_onboarding") { inclusive = true }
-                    }
-                },
-                onCancel = {
-                    navController.navigate("showcase") {
-                        popUpTo("partner_onboarding") { inclusive = true }
-                    }
                 }
             )
         }
@@ -141,13 +103,7 @@ fun MainScreen(
                 repository = repository,
                 onLoginSuccess = { user ->
                     Toast.makeText(context, "Bienvenue ${user.name} !", Toast.LENGTH_SHORT).show()
-                    val dest = when (user.role.uppercase()) {
-                        "CLIENT" -> "client_dashboard"
-                        "HOTEL_ADMIN" -> "hotel_admin_dashboard"
-                        "SUPER_ADMIN" -> "super_admin_dashboard"
-                        else -> "client_dashboard"
-                    }
-                    navController.navigate(dest) {
+                    navController.navigate("client_dashboard") {
                         popUpTo("auth") { inclusive = true }
                     }
                 }
@@ -171,78 +127,6 @@ fun MainScreen(
                 preferencesManager = preferencesManager
             )
         }
-
-        composable("hotel_admin_dashboard") {
-            HotelAdminDashboardScreen(
-                repository = repository,
-                hotels = hotels,
-                bookings = bookings,
-                rooms = rooms,
-                currentUser = currentUser,
-                onLogout = {
-                    FirebaseClient.signOut(repository)
-                    navController.navigate("showcase") {
-                        popUpTo("hotel_admin_dashboard") { inclusive = true }
-                    }
-                },
-                onOpenShowcase = {
-                    navController.navigate("showcase")
-                },
-                onOpenCatalog = {
-                    navController.navigate("hotel_catalog_management")
-                },
-                onOpenCalendar = {
-                    navController.navigate("hotel_calendar_schedule")
-                },
-                onOpenFinance = {
-                    navController.navigate("hotel_finance_reports")
-                }
-            )
-        }
-
-        composable("hotel_catalog_management") {
-            CatalogManagementScreen(
-                repository = repository,
-                currentUser = currentUser,
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        composable("hotel_calendar_schedule") {
-            CalendarScheduleScreen(
-                repository = repository,
-                currentUser = currentUser,
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        composable("hotel_finance_reports") {
-            FinanceReportsScreen(
-                repository = repository,
-                currentUser = currentUser,
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        composable("super_admin_dashboard") {
-            SuperAdminDashboard(
-                repository = repository,
-                hotels = hotels,
-                bookings = bookings,
-                onLogout = {
-                    FirebaseClient.signOut(repository)
-                    navController.navigate("auth") {
-                        popUpTo("super_admin_dashboard") { inclusive = true }
-                    }
-                }
-            )
-        }
     }
 }
 
@@ -262,8 +146,6 @@ fun AuthScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var otpInput by remember { mutableStateOf("") }
-    var selectedRole by remember { mutableStateOf("Client") } // "Client", "HotelAdmin", "SuperAdmin"
-    var hotelNameInput by remember { mutableStateOf("") }
 
     // Google Sign-In Activity Result Launcher
     val googleSignInLauncher = rememberLauncherForActivityResult(
@@ -492,64 +374,23 @@ fun AuthScreen(
                                             color = Color.Gray
                                         )
 
-                                        // Quick 1-tap Google simulation buttons
-                                        Row(
+                                        // Quick 1-tap Google simulation button
+                                        OutlinedButton(
+                                            onClick = {
+                                                viewModel.performDirectGoogleAuth(
+                                                    email = "voyageur.rdc@gmail.com",
+                                                    name = "Marc Kalume (Client)",
+                                                    photoUrl = null,
+                                                    idToken = "demo_token_client",
+                                                    onSuccess = { onLoginSuccess(it) },
+                                                    onError = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+                                                )
+                                            },
                                             modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            shape = RoundedCornerShape(12.dp),
+                                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
                                         ) {
-                                            OutlinedButton(
-                                                onClick = {
-                                                    viewModel.performDirectGoogleAuth(
-                                                        email = "aganzec29@gmail.com",
-                                                        name = "Christian Aganze (SuperAdmin)",
-                                                        photoUrl = null,
-                                                        idToken = "demo_token_superadmin",
-                                                        onSuccess = { onLoginSuccess(it) },
-                                                        onError = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
-                                                    )
-                                                },
-                                                modifier = Modifier.weight(1f),
-                                                shape = RoundedCornerShape(12.dp),
-                                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp)
-                                            ) {
-                                                Text("👑 SuperAdmin", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
-                                            }
-
-                                            OutlinedButton(
-                                                onClick = {
-                                                    viewModel.performDirectGoogleAuth(
-                                                        email = "hotel.serena@bookzzz.com",
-                                                        name = "Directeur Goma Serena",
-                                                        photoUrl = null,
-                                                        idToken = "demo_token_hotel",
-                                                        onSuccess = { onLoginSuccess(it) },
-                                                        onError = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
-                                                    )
-                                                },
-                                                modifier = Modifier.weight(1f),
-                                                shape = RoundedCornerShape(12.dp),
-                                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp)
-                                            ) {
-                                                Text("🏨 Hôtelier", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
-                                            }
-
-                                            OutlinedButton(
-                                                onClick = {
-                                                    viewModel.performDirectGoogleAuth(
-                                                        email = "voyageur.rdc@gmail.com",
-                                                        name = "Marc Kalume (Client)",
-                                                        photoUrl = null,
-                                                        idToken = "demo_token_client",
-                                                        onSuccess = { onLoginSuccess(it) },
-                                                        onError = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
-                                                    )
-                                                },
-                                                modifier = Modifier.weight(1f),
-                                                shape = RoundedCornerShape(12.dp),
-                                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp)
-                                            ) {
-                                                Text("✈️ Client", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
-                                            }
+                                            Text("✈️ Connexion Démo Voyageur (Marc Kalume)", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                                         }
                                     }
                                 }
@@ -565,35 +406,6 @@ fun AuthScreen(
                                             shape = RoundedCornerShape(16.dp),
                                             singleLine = true
                                         )
-
-                                        // Role selector in sign up
-                                        Text("Type de compte :", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                        ) {
-                                            listOf("Client" to "Voyageur", "HotelAdmin" to "Hôtelier", "SuperAdmin" to "Admin").forEach { (roleKey, roleLabel) ->
-                                                val isRoleSelected = selectedRole == roleKey
-                                                FilterChip(
-                                                    selected = isRoleSelected,
-                                                    onClick = { selectedRole = roleKey },
-                                                    label = { Text(roleLabel, fontSize = 11.sp) },
-                                                    modifier = Modifier.weight(1f)
-                                                )
-                                            }
-                                        }
-
-                                        if (selectedRole == "HotelAdmin") {
-                                            OutlinedTextField(
-                                                value = hotelNameInput,
-                                                onValueChange = { hotelNameInput = it },
-                                                label = { Text("Nom de votre Établissement") },
-                                                leadingIcon = { Icon(Icons.Default.Apartment, contentDescription = null, tint = Color(0xFF3498DB)) },
-                                                modifier = Modifier.fillMaxWidth(),
-                                                shape = RoundedCornerShape(16.dp),
-                                                singleLine = true
-                                            )
-                                        }
                                     }
 
                                     OutlinedTextField(
@@ -634,8 +446,8 @@ fun AuthScreen(
                                                     name = name,
                                                     email = email,
                                                     password = password,
-                                                    role = selectedRole,
-                                                    hotelName = if (selectedRole == "HotelAdmin") hotelNameInput.ifBlank { "Mon Hôtel Partenaire" } else null,
+                                                    role = "Client",
+                                                    hotelName = null,
                                                     onSuccess = { onLoginSuccess(it) },
                                                     onError = { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
                                                 )
@@ -3513,235 +3325,3 @@ fun TravelAgentChatScreen() {
     }
 }
 
-// --- 4. Hotel Admin Dashboard ---
-@Composable
-fun HotelAdminDashboard(
-    repository: BookZzzRepository, // Update this signature to have access to rooms
-    hotels: List<Hotel>,
-    bookings: List<Booking>,
-    rooms: List<Room>, // Add this
-    currentUser: UserProfile?,
-    onLogout: () -> Unit
-) {
-    var selectedTab by remember { mutableIntStateOf(0) }
-    val hotelManagedName = currentUser?.registeredHotelName ?: "Goma Serena Hotel"
-    val localBookings = bookings.filter { it.hotelName.contains(hotelManagedName, ignoreCase = true) }
-    val localRooms = rooms.filter { hotel -> hotels.find { it.id == hotel.hotelId }?.name?.contains(hotelManagedName, ignoreCase = true) == true }
-
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        // Admin Header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(text = "Console Gérant", fontWeight = FontWeight.Black, fontSize = 20.sp, color = Color(0xFF1F3A5F))
-                Text(text = "Hôtel : $hotelManagedName", fontSize = 12.sp, color = Color.DarkGray)
-            }
-            IconButton(onClick = onLogout, modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(Color(0xFFFADBD8))) {
-                Icon(imageVector = Icons.Default.Logout, contentDescription = null, tint = Color.Red)
-            }
-        }
-
-        Divider(modifier = Modifier.padding(vertical = 12.dp))
-        
-        TabRow(selectedTabIndex = selectedTab) {
-            Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }, text = { Text("Réservations") })
-            Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }, text = { Text("Gestion Chambres") })
-        }
-
-        if (selectedTab == 0) {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.weight(1f)) {
-                items(localBookings.reversed()) { booking ->
-                    AdminBookingVerifyCard(booking = booking, repository = repository)
-                }
-            }
-        } else {
-            LazyColumn {
-                items(localRooms) { room ->
-                    RoomItem(room = room, onUpdate = { repository.updateRoom(it) })
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun RoomItem(room: Room, onUpdate: (Room) -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-        Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-            Column {
-                Text(room.type, fontWeight = FontWeight.Bold)
-                Text("${room.pricePerNight.roundToInt()} USD")
-            }
-            Switch(checked = room.isAvailable, onCheckedChange = { onUpdate(room.copy(isAvailable = it)) })
-        }
-    }
-}
-
-@Composable
-fun AdminBookingVerifyCard(booking: Booking, repository: BookZzzRepository) {
-    var showImage by remember { mutableStateOf(false) }
-
-    if (showImage) {
-        Dialog(onDismissRequest = { showImage = false }) {
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Preuve de paiement", fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Box(modifier = Modifier.size(200.dp).background(Color.LightGray), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Image, contentDescription = null, modifier = Modifier.size(64.dp), tint = Color.Gray)
-                        Text(booking.screenshotName, fontSize = 10.sp, modifier = Modifier.align(Alignment.BottomCenter).padding(8.dp))
-                    }
-                    TextButton(onClick = { showImage = false }) { Text("Fermer") }
-                }
-            }
-        }
-    }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(18.dp),
-        border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.4f))
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Column {
-                    Text(text = booking.userName, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF1F3A5F))
-                    Text(text = "Réf: ${booking.id}", fontSize = 11.sp, color = Color.Gray)
-                }
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(if (booking.status == "Validé") Color(0xFF27AE60).copy(alpha = 0.1f) else Color(0xFFD35400).copy(alpha = 0.1f))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = booking.status,
-                        color = if (booking.status == "Validé") Color(0xFF27AE60) else Color(0xFFD35400),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 10.sp
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            Text("Type: ${booking.roomType}", fontSize = 13.sp)
-            Text("Dates: ${booking.arrivalDate} -> ${booking.departureDate} (${booking.numNights} nuits)", fontSize = 13.sp)
-            Text("Transaction: ${booking.transactionId} (${booking.operatorSelected})", fontSize = 13.sp, fontWeight = FontWeight.Bold)
-            
-            Spacer(modifier = Modifier.height(12.dp))
-
-            if (booking.screenshotName.isNotEmpty()) {
-                OutlinedButton(
-                    onClick = { showImage = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Icon(Icons.Default.Image, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Vérifier la preuve (Screenshot)")
-                }
-            }
-
-            if (booking.status == "En Attente") {
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = { repository.updateBookingStatus(booking.id, "Validé") },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF27AE60)),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Valider la réservation")
-                }
-            }
-        }
-    }
-}
-
-// --- 5. Super Admin Dashboard ---
-@Composable
-fun SuperAdminDashboard(
-    repository: BookZzzRepository,
-    hotels: List<Hotel>,
-    bookings: List<Booking>,
-    onLogout: () -> Unit
-) {
-    val totalRevenue = bookings.filter { it.status == "Validé" }.sumOf { it.totalAmount }
-    val totalHotels = hotels.size
-    val activeHotels = hotels.count { !it.isSuspended }
-
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(text = "Super Administrateur", fontWeight = FontWeight.Black, fontSize = 22.sp, color = Color(0xFF1F3A5F))
-                Text(text = "Contrôle Global Réseau BookZZZ", fontSize = 12.sp, color = Color.Gray)
-            }
-            IconButton(onClick = onLogout, modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(Color(0xFFFADBD8))) {
-                Icon(imageVector = Icons.Default.Logout, contentDescription = null, tint = Color.Red)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Card(modifier = Modifier.weight(1f), colors = CardDefaults.cardColors(containerColor = Color(0xFFEBF5FB))) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Revenu", fontSize = 11.sp)
-                    Text("${totalRevenue.roundToInt()} USD", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                }
-            }
-            Card(modifier = Modifier.weight(1f), colors = CardDefaults.cardColors(containerColor = Color(0xFFE9F7EF))) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Hôtels", fontSize = 11.sp)
-                    Text("$activeHotels / $totalHotels", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        Text("Gestion des Établissements", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-        Spacer(modifier = Modifier.height(12.dp))
-
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.weight(1f)) {
-            items(hotels) { hotel ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    border = BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.3f))
-                ) {
-                    Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Column {
-                            Text(hotel.name, fontWeight = FontWeight.Bold)
-                            Text(hotel.city, fontSize = 12.sp, color = Color.Gray)
-                        }
-                        
-                        Button(
-                            onClick = { repository.toggleHotelSuspension(hotel.id) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (hotel.isSuspended) Color(0xFF27AE60) else Color(0xFFE74C3C)
-                            ),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(if (hotel.isSuspended) "Activer" else "Suspendre", fontSize = 11.sp)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}

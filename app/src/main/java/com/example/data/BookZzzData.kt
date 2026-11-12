@@ -14,8 +14,8 @@ data class UserProfile(
     val id: String,
     val name: String,
     val email: String,
-    val role: String, // "Client", "HotelAdmin", "SuperAdmin"
-    val registeredHotelName: String? = null, // For HotelAdmin
+    val role: String = "Client",
+    val registeredHotelName: String? = null,
     val photoUrl: String? = null,
     val authProvider: String = "Email" // "Google", "Email", "Phone", "Firebase"
 )
@@ -64,6 +64,61 @@ data class Booking(
     val rescheduledFrom: String? = null,
     val rescheduleReason: String? = null,
     val dateChangeHistory: List<String> = emptyList()
+)
+
+enum class ServiceCategory {
+    HOTEL_ROOMS,
+    FURNISHED_APARTMENTS,
+    REAL_ESTATE_RENTALS,
+    VEHICLE_SHUTTLE
+}
+
+data class FurnishedApartment(
+    val id: String,
+    val title: String,
+    val description: String,
+    val city: String,
+    val address: String,
+    val pricePerNight: Double,
+    val pricePerMonth: Double? = null,
+    val numberOfRooms: Int,
+    val numberOfBathrooms: Int,
+    val maxGuests: Int,
+    val isWaterAndElectricity247: Boolean = true,
+    val images: List<String> = emptyList(),
+    val ownerPhone: String,
+    val isAvailable: Boolean = true
+)
+
+data class RealEstateListing(
+    val id: String,
+    val title: String,
+    val propertyType: String,
+    val city: String,
+    val commune: String,
+    val monthlyRentUSD: Double,
+    val cautionMonths: Int = 3,
+    val advanceMonths: Int = 1,
+    val description: String,
+    val features: List<String> = listOf("Cour clôturée", "Citerne d'eau", "Compteur prépayé SNEL", "Gardiennage"),
+    val agencyName: String,
+    val contactPhone: String,
+    val availableFromDate: String,
+    val isPublished: Boolean = true
+)
+
+data class SharedVehicle(
+    val id: String,
+    val modelName: String,
+    val category: String,
+    val seats: Int = 5,
+    val pricePerDayUSD: Double = 120.0,
+    val priceAirportTransferUSD: Double = 35.0,
+    val hasAirConditioning: Boolean = true,
+    val hasChauffeurIncluded: Boolean = true,
+    val driverName: String? = null,
+    val driverPhone: String? = null,
+    val isAvailable: Boolean = true
 )
 
 // --- Sample Data ---
@@ -178,7 +233,7 @@ object SampleData {
     )
 
     val sampleApartments = listOf(
-        com.example.shared.models.FurnishedApartment(
+        FurnishedApartment(
             id = "APT-01",
             title = "Appartement de Luxe Vue Lac Kivu",
             description = "Appartement meublé 3 pièces tout équipé au quartier Himbi. Eau chaude permanente, groupe électrogène 24/7, gardiennage et Wi-Fi Fibre.",
@@ -193,7 +248,7 @@ object SampleData {
             ownerPhone = "+243 812 345 678",
             isAvailable = true
         ),
-        com.example.shared.models.FurnishedApartment(
+        FurnishedApartment(
             id = "APT-02",
             title = "Résidence Diplomatique Gombe",
             description = "Studio VIP meublé avec finitions modernes, cuisine américaine équipée, balcon privatif et parking sécurisé.",
@@ -211,7 +266,7 @@ object SampleData {
     )
 
     val sampleRealEstate = listOf(
-        com.example.shared.models.RealEstateListing(
+        RealEstateListing(
             id = "IMM-01",
             title = "Villa Moderne 4 Chambres avec Jardin",
             propertyType = "Villa Résidentielle",
@@ -226,7 +281,7 @@ object SampleData {
             availableFromDate = "01/10/2026",
             isPublished = true
         ),
-        com.example.shared.models.RealEstateListing(
+        RealEstateListing(
             id = "IMM-02",
             title = "Appartement 3 Pièces Neuf à Louer",
             propertyType = "Appartement",
@@ -244,7 +299,7 @@ object SampleData {
     )
 
     val sampleVehicles = listOf(
-        com.example.shared.models.SharedVehicle(
+        SharedVehicle(
             id = "VEH-01",
             modelName = "Toyota Land Cruiser Prado TXL",
             category = "SUV 4x4 Luxe",
@@ -257,7 +312,7 @@ object SampleData {
             driverPhone = "+243 821 112 233",
             isAvailable = true
         ),
-        com.example.shared.models.SharedVehicle(
+        SharedVehicle(
             id = "VEH-02",
             modelName = "Toyota HiAce Coaster VIP",
             category = "Minibus Délégation",
@@ -291,9 +346,9 @@ class BookZzzRepository(private val context: Context) {
     private val bookingListAdapter = moshi.adapter<List<Booking>>(Types.newParameterizedType(List::class.java, Booking::class.java))
     private val userAdapter = moshi.adapter(UserProfile::class.java)
     private val roomListAdapter = moshi.adapter<List<Room>>(Types.newParameterizedType(List::class.java, Room::class.java))
-    private val apartmentListAdapter = moshi.adapter<List<com.example.shared.models.FurnishedApartment>>(Types.newParameterizedType(List::class.java, com.example.shared.models.FurnishedApartment::class.java))
-    private val realEstateListAdapter = moshi.adapter<List<com.example.shared.models.RealEstateListing>>(Types.newParameterizedType(List::class.java, com.example.shared.models.RealEstateListing::class.java))
-    private val vehicleListAdapter = moshi.adapter<List<com.example.shared.models.SharedVehicle>>(Types.newParameterizedType(List::class.java, com.example.shared.models.SharedVehicle::class.java))
+    private val apartmentListAdapter = moshi.adapter<List<FurnishedApartment>>(Types.newParameterizedType(List::class.java, FurnishedApartment::class.java))
+    private val realEstateListAdapter = moshi.adapter<List<RealEstateListing>>(Types.newParameterizedType(List::class.java, RealEstateListing::class.java))
+    private val vehicleListAdapter = moshi.adapter<List<SharedVehicle>>(Types.newParameterizedType(List::class.java, SharedVehicle::class.java))
 
     private val _rooms = MutableStateFlow<List<Room>>(emptyList())
     val rooms: StateFlow<List<Room>> = _rooms.asStateFlow()
@@ -304,14 +359,14 @@ class BookZzzRepository(private val context: Context) {
     private val _bookings = MutableStateFlow<List<Booking>>(emptyList())
     val bookings: StateFlow<List<Booking>> = _bookings.asStateFlow()
 
-    private val _apartments = MutableStateFlow<List<com.example.shared.models.FurnishedApartment>>(emptyList())
-    val apartments: StateFlow<List<com.example.shared.models.FurnishedApartment>> = _apartments.asStateFlow()
+    private val _apartments = MutableStateFlow<List<FurnishedApartment>>(emptyList())
+    val apartments: StateFlow<List<FurnishedApartment>> = _apartments.asStateFlow()
 
-    private val _realEstateListings = MutableStateFlow<List<com.example.shared.models.RealEstateListing>>(emptyList())
-    val realEstateListings: StateFlow<List<com.example.shared.models.RealEstateListing>> = _realEstateListings.asStateFlow()
+    private val _realEstateListings = MutableStateFlow<List<RealEstateListing>>(emptyList())
+    val realEstateListings: StateFlow<List<RealEstateListing>> = _realEstateListings.asStateFlow()
 
-    private val _vehicles = MutableStateFlow<List<com.example.shared.models.SharedVehicle>>(emptyList())
-    val vehicles: StateFlow<List<com.example.shared.models.SharedVehicle>> = _vehicles.asStateFlow()
+    private val _vehicles = MutableStateFlow<List<SharedVehicle>>(emptyList())
+    val vehicles: StateFlow<List<SharedVehicle>> = _vehicles.asStateFlow()
 
     private val _currentUser = MutableStateFlow<UserProfile?>(null)
     val currentUser: StateFlow<UserProfile?> = _currentUser.asStateFlow()
@@ -382,13 +437,13 @@ class BookZzzRepository(private val context: Context) {
     }
 
     // --- APARTMENTS CRUD ---
-    fun addApartment(apartment: com.example.shared.models.FurnishedApartment) {
+    fun addApartment(apartment: FurnishedApartment) {
         val updated = _apartments.value + apartment
         _apartments.value = updated
         sharedPrefs.edit().putString("apartments_list", apartmentListAdapter.toJson(updated)).apply()
     }
 
-    fun updateApartment(apartment: com.example.shared.models.FurnishedApartment) {
+    fun updateApartment(apartment: FurnishedApartment) {
         val updated = _apartments.value.map { if (it.id == apartment.id) apartment else it }
         _apartments.value = updated
         sharedPrefs.edit().putString("apartments_list", apartmentListAdapter.toJson(updated)).apply()
@@ -401,13 +456,13 @@ class BookZzzRepository(private val context: Context) {
     }
 
     // --- REAL ESTATE CRUD ---
-    fun addRealEstate(listing: com.example.shared.models.RealEstateListing) {
+    fun addRealEstate(listing: RealEstateListing) {
         val updated = _realEstateListings.value + listing
         _realEstateListings.value = updated
         sharedPrefs.edit().putString("realestate_list", realEstateListAdapter.toJson(updated)).apply()
     }
 
-    fun updateRealEstate(listing: com.example.shared.models.RealEstateListing) {
+    fun updateRealEstate(listing: RealEstateListing) {
         val updated = _realEstateListings.value.map { if (it.id == listing.id) listing else it }
         _realEstateListings.value = updated
         sharedPrefs.edit().putString("realestate_list", realEstateListAdapter.toJson(updated)).apply()
@@ -420,13 +475,13 @@ class BookZzzRepository(private val context: Context) {
     }
 
     // --- VEHICLE CRUD ---
-    fun addVehicle(vehicle: com.example.shared.models.SharedVehicle) {
+    fun addVehicle(vehicle: SharedVehicle) {
         val updated = _vehicles.value + vehicle
         _vehicles.value = updated
         sharedPrefs.edit().putString("vehicles_list", vehicleListAdapter.toJson(updated)).apply()
     }
 
-    fun updateVehicle(vehicle: com.example.shared.models.SharedVehicle) {
+    fun updateVehicle(vehicle: SharedVehicle) {
         val updated = _vehicles.value.map { if (it.id == vehicle.id) vehicle else it }
         _vehicles.value = updated
         sharedPrefs.edit().putString("vehicles_list", vehicleListAdapter.toJson(updated)).apply()
